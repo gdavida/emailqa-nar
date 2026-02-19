@@ -92,6 +92,10 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
+.hide {
+  display: none;
+}
+
   /* Top bar */
   .topbar {
     position: sticky;
@@ -937,6 +941,194 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.error { border-color: var(--fail); color: var(--fail); }
 
+  /* Celebration */
+  .celebration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+  }
+
+  .unicorn {
+    position: fixed;
+    z-index: 10002;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    opacity: 0;
+    left: 5%;
+    top: 80%;
+    animation: unicornFly 3s ease-in-out forwards;
+  }
+
+  .unicorn img {
+    height: 120px;
+    width: auto;
+  }
+
+  .unicorn.landed {
+    animation: unicornBob 1.5s ease-in-out infinite;
+    opacity: 1;
+    left: 50%;
+    top: calc(55% - 180px);
+    transform: translateX(-50%);
+  }
+
+  .unicorn.sparkle-out {
+    opacity: 1;
+    left: 50%;
+    top: calc(55% - 180px);
+    transform: translateX(-50%);
+    animation: sparkleOut 1s ease-out forwards;
+  }
+
+  @keyframes unicornFly {
+    0% { 
+      opacity: 0;
+      left: 5%;
+      top: 80%;
+    }
+    20% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    80% {
+      opacity: 0.8;
+    }
+    100% { 
+      opacity: 1;
+      left: 50%;
+      top: calc(55% - 180px);
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes unicornBob {
+    0%, 100% { transform: translateX(-50%) translateY(0) rotate(-1deg); }
+    50% { transform: translateX(-50%) translateY(-12px) rotate(1deg); }
+  }
+
+  @keyframes sparkleOut {
+    0% { opacity: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); transform: translateX(-50%) scale(1); }
+    40% { opacity: 1; filter: drop-shadow(0 0 40px #fbbf24) drop-shadow(0 0 80px #f472b6); transform: translateX(-50%) scale(1.15); }
+    100% { opacity: 0; filter: drop-shadow(0 0 0px transparent); transform: translateX(-50%) scale(0.9); }
+  }
+
+  .success-message {
+    position: fixed;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--surface);
+    padding: 60px 80px 50px;
+    border-radius: 32px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+    z-index: 10001;
+    text-align: center;
+    animation: popIn 0.6s ease-out 0.5s forwards;
+    border: 4px solid transparent;
+    background-image: 
+      linear-gradient(var(--surface), var(--surface)),
+      linear-gradient(135deg, #818cf8, #f472b6, #fbbf24, #4ade80);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    min-width: 400px;
+  }
+
+  .success-message::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffd700, #ffec8b, #daa520, #ffd700, #ffec8b);
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4);
+  }
+
+  .success-message h2 {
+    font-size: 42px;
+    margin: 0 0 16px;
+    background: linear-gradient(135deg, #818cf8, #f472b6, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .success-message h2.gold {
+    background: linear-gradient(135deg, #ffd700, #ffec8b, #daa520, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .success-message p {
+    font-size: 20px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .success-message .decorative-dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+  }
+
+  .success-message .decorative-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: dotBounce 1s ease-in-out infinite;
+  }
+
+  .success-message .decorative-dots span:nth-child(1) { background: #818cf8; animation-delay: 0s; }
+  .success-message .decorative-dots span:nth-child(2) { background: #f472b6; animation-delay: 0.15s; }
+  .success-message .decorative-dots span:nth-child(3) { background: #fbbf24; animation-delay: 0.3s; }
+  .success-message .decorative-dots span:nth-child(4) { background: #4ade80; animation-delay: 0.45s; }
+  .success-message .decorative-dots span:nth-child(5) { background: #60a5fa; animation-delay: 0.6s; }
+
+  @keyframes dotBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .success-message.fade-out {
+    animation: fadeOut 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeOut {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    70% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
   @media (max-width: 640px) {
     .field-grid, .field-grid-3 { grid-template-columns: 1fr; }
     .field-grid .full-width, .field-grid-3 > * { grid-column: 1; }
@@ -948,6 +1140,7 @@
     .main { padding: 20px 12px 80px; }
   }
 </style>
+<script src="celebration-config.js"></script>
 </head>
 <body>
 
@@ -956,6 +1149,7 @@
     <span class="topbar-title">NAR Email QA</span>
   </div>
   <div class="topbar-right">
+    <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" id="themeBtn">🌙</button>
   </div>
 </div>
@@ -974,10 +1168,6 @@
 
       <!-- Campaign Info -->
       <div class="field-grid">
-        <div class="field full-width">
-          <label class="field-label">Send Date</label>
-          <input class="field-input" type="date" data-field="send_date">
-        </div>
         <div class="field">
           <label class="field-label">Campaign Name</label>
           <input class="field-input" type="text" data-field="campaign_name" placeholder="e.g. 2025_02_MemberBenefit_Promo">
@@ -1145,10 +1335,10 @@
             <div class="param-row"><span class="param-key">utm_medium:</span> <code>email</code></div>
             <div class="param-row"><span class="param-key">utm_campaign:</span> <code>(provided by stakeholder)</code></div>
           </div>
-        </div>
-        <div class="checklist-conditional" id="missingParamsField" style="display: none;">
-          <label class="field-label">If any missing, note why:</label>
-          <input class="field-input" type="text" data-field="missing_params_reason" placeholder="Reason for missing parameters...">
+          <div class="checklist-conditional" id="missingParamsField">
+            <label class="field-label">If any missing, note why:</label>
+            <input class="field-input" type="text" data-field="missing_params_reason" placeholder="Reason for missing parameters..." style="width: 100%; margin-top: 4px;">
+          </div>
         </div>
       </div>
 
@@ -1438,7 +1628,6 @@
 
     // Campaign Info required fields
     const requiredFields = [
-      { selector: '[data-field="send_date"]', name: 'Send Date' },
       { selector: '[data-field="campaign_name"]', name: 'Campaign Name' },
       { selector: '[data-field="campaign_id"]', name: 'Campaign ID' },
       { selector: '[data-field="jira_link"]', name: 'Jira Ticket' },
@@ -1491,7 +1680,6 @@
 
     // Required checkboxes in QA Checklist
     const requiredChecks = [
-      'link_params_set',
       'cid_on_links',
       'links_match_brief',
       'lists_match_strategy',
@@ -1509,6 +1697,19 @@
         isValid = false;
       }
     });
+
+    // Link params: either checked OR reason provided
+    const linkParamsCheck = document.querySelector('[data-check="link_params_set"]');
+    const linkParamsReason = document.querySelector('[data-field="missing_params_reason"]');
+    if (linkParamsCheck && !linkParamsCheck.checked) {
+      if (!linkParamsReason || !linkParamsReason.value.trim()) {
+        const label = linkParamsCheck.closest('.checklist-item');
+        if (label) label.classList.add('error');
+        if (linkParamsReason) linkParamsReason.classList.add('error');
+        if (!firstError) firstError = linkParamsCheck;
+        isValid = false;
+      }
+    }
 
     // Experiment checklist items (if shown)
     if (expYes.checked) {
@@ -1601,7 +1802,11 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      showToast('QA submitted to Google Sheet ✓');
+      celebrate();
+      setTimeout(() => {
+        clearForm();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 9500);
     } catch (err) {
       showToast('Error submitting: ' + err.message, true);
     } finally {
@@ -1610,8 +1815,87 @@
     }
   }
 
-  function resetForm() {
-    if (!confirm('Clear all fields?')) return;
+  function celebrate() {
+    const config = CELEBRATION_CONFIG;
+    
+    // Get first name from QA'd By field
+    const qaByField = document.querySelector('[data-field="qa_by"]');
+    const fullName = qaByField ? qaByField.value.trim() : '';
+    const firstName = fullName.split(' ')[0] || config.fallbackName;
+
+    // Randomly select a message
+    const messageData = config.messages[Math.floor(Math.random() * config.messages.length)];
+
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'celebration-overlay';
+    document.body.appendChild(overlay);
+
+    // Add confetti
+    const colors = config.confettiColors;
+    for (let i = 0; i < config.confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.background = color;
+      confetti.style.boxShadow = `0 0 6px ${color}`;
+      confetti.style.width = (Math.random() * 10 + 5) + 'px';
+      confetti.style.height = (Math.random() * 10 + 5) + 'px';
+      confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      confetti.style.animation = `confettiFall ${Math.random() * 3 + 4}s linear ${Math.random() * 1.5}s forwards`;
+      overlay.appendChild(confetti);
+    }
+
+    // Add unicorn - randomly select from available images
+    const unicorn = document.createElement('div');
+    unicorn.className = 'unicorn';
+    const unicornImg = document.createElement('img');
+    unicornImg.src = config.unicorns[Math.floor(Math.random() * config.unicorns.length)];
+    unicorn.appendChild(unicornImg);
+    document.body.appendChild(unicorn);
+
+    // Add success message with personalization
+    const message = document.createElement('div');
+    message.className = 'success-message';
+    const title = messageData.title.replace('{name}', firstName);
+    const styleClass = messageData.style === 'gold' ? ' class="gold"' : '';
+    message.innerHTML = `<h2${styleClass}>${title}</h2><p>${config.subtitle}</p><div class="decorative-dots"><span></span><span></span><span></span><span></span><span></span></div>`;
+    document.body.appendChild(message);
+
+    // Timeline:
+    // 0-3s - unicorn flies in smoothly, fades in
+    // 3s - unicorn lands, starts bobbing, message appears
+    // 3-8s - unicorn bobs (5 seconds of bobbing)
+    // 8s - unicorn sparkles out
+    // 8.3s - message fades (starts just after unicorn)
+    // 9.5s - cleanup
+
+    // Unicorn lands and bobs
+    setTimeout(() => {
+      unicorn.classList.add('landed');
+    }, 3000);
+
+    // Unicorn sparkles out
+    setTimeout(() => {
+      unicorn.classList.remove('landed');
+      unicorn.classList.add('sparkle-out');
+    }, 8000);
+
+    // Message fades (right after unicorn starts fading)
+    setTimeout(() => {
+      message.classList.add('fade-out');
+    }, 8300);
+
+    // Cleanup
+    setTimeout(() => {
+      overlay.remove();
+      unicorn.remove();
+      message.remove();
+    }, 9500);
+  }
+
+  function clearForm() {
     document.querySelectorAll('.field-input').forEach(i => {
       if (i.tagName === 'SELECT') i.selectedIndex = 0;
       else i.value = '';
@@ -1624,8 +1908,15 @@
     document.getElementById('experimentYesItems').style.display = 'none';
     document.getElementById('experimentNoItems').style.display = 'none';
     document.getElementById('shortSendWarning').style.display = 'none';
+    document.getElementById('missingParamsField').style.display = 'block';
+    clearErrors();
     Object.keys(formData).forEach(k => delete formData[k]);
     updateCounts();
+  }
+
+  function resetForm() {
+    if (!confirm('Clear all fields?')) return;
+    clearForm();
     showToast('Form cleared');
   }
 
