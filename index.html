@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAR Email QA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="light"] {
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --surface-hover: #F0F1F4;
+    --border: #E0E2E8;
+    --border-focus: #5B6BF0;
+    --text: #1A1D27;
+    --text-muted: #6B7085;
+    --text-dim: #9DA2B3;
+    --accent: #5B6BF0;
+    --accent-glow: rgba(91, 107, 240, 0.12);
+    --pass: #16A34A;
+    --pass-bg: rgba(22, 163, 74, 0.08);
+    --pass-border: rgba(22, 163, 74, 0.3);
+    --fail: #DC2626;
+    --fail-bg: rgba(220, 38, 38, 0.06);
+    --fail-border: rgba(220, 38, 38, 0.3);
+    --flag: #D97706;
+    --flag-bg: rgba(217, 119, 6, 0.08);
+    --flag-border: rgba(217, 119, 6, 0.3);
+    --pending: #2563EB;
+    --pending-bg: rgba(37, 99, 235, 0.08);
+    --pending-border: rgba(37, 99, 235, 0.3);
+    --na-bg: #F3F4F6;
+    --na-border: #D1D5DB;
+    --na-text: #6B7280;
+    --topbar-bg: rgba(245, 246, 248, 0.88);
+    --statusbar-bg: rgba(245, 246, 248, 0.92);
+    --section-info: #2563EB;
+    --section-content: #7C3AED;
+    --section-test: #D97706;
+    --section-list: #16A34A;
+    --section-signoff: #DC2626;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0F1117;
+    --surface: #1A1D27;
+    --surface-hover: #22252F;
+    --border: #2A2D3A;
+    --border-focus: #5B6BF0;
+    --text: #E8E9ED;
+    --text-muted: #8B8FA3;
+    --text-dim: #5A5E72;
+    --accent: #5B6BF0;
+    --accent-glow: rgba(91, 107, 240, 0.15);
+    --pass: #34D399;
+    --pass-bg: rgba(52, 211, 153, 0.1);
+    --pass-border: rgba(52, 211, 153, 0.35);
+    --fail: #F87171;
+    --fail-bg: rgba(248, 113, 113, 0.1);
+    --fail-border: rgba(248, 113, 113, 0.35);
+    --flag: #FBBF24;
+    --flag-bg: rgba(251, 191, 36, 0.1);
+    --flag-border: rgba(251, 191, 36, 0.35);
+    --pending: #60A5FA;
+    --pending-bg: rgba(96, 165, 250, 0.1);
+    --pending-border: rgba(96, 165, 250, 0.35);
+    --na-bg: rgba(255,255,255,0.04);
+    --na-border: #3A3D4A;
+    --na-text: #6B7085;
+    --topbar-bg: rgba(15, 17, 23, 0.85);
+    --statusbar-bg: rgba(15, 17, 23, 0.9);
+    --section-info: #60A5FA;
+    --section-content: #A78BFA;
+    --section-test: #F59E0B;
+    --section-list: #34D399;
+    --section-signoff: #F87171;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  /* Top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .topbar-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s ease;
+  }
+
+  .theme-toggle:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn:hover { background: var(--surface-hover); border-color: var(--text-dim); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #6B7BFF;
+    border-color: #6B7BFF;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Main */
+  .main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 6px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+    transition: background 0.15s ease;
+    user-select: none;
+  }
+
+  .section-header:hover { background: var(--surface); }
+
+  .section-indicator {
+    width: 4px;
+    height: 22px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .section-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .section-chevron {
+    color: var(--text-dim);
+    transition: transform 0.2s ease;
+    font-size: 13px;
+  }
+
+  .section.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  .section-body {
+    padding: 4px 16px 20px 30px;
+  }
+
+  /* Field grid */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field-grid .full-width { grid-column: 1 / -1; }
+  .field-grid .third { grid-column: span 1; }
+
+  .field-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .field-sublabel {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: -3px;
+  }
+
+  .field-input {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    transition: all 0.15s ease;
+    outline: none;
+    box-shadow: var(--shadow);
+  }
+
+  .field-input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .field-input::placeholder { color: var(--text-dim); }
+
+  select.field-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239DA2B3' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  textarea.field-input {
+    resize: vertical;
+    min-height: 72px;
+  }
+
+  /* QA Toggles */
+  .qa-toggle-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .qa-toggle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow);
+  }
+
+  .qa-toggle:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .qa-toggle.active[data-value="pass"] {
+    background: var(--pass-bg); border-color: var(--pass-border); color: var(--pass);
+    box-shadow: 0 0 8px var(--pass-bg);
+  }
+  .qa-toggle.active[data-value="fail"] {
+    background: var(--fail-bg); border-color: var(--fail-border); color: var(--fail);
+    box-shadow: 0 0 8px var(--fail-bg);
+  }
+  .qa-toggle.active[data-value="flag"] {
+    background: var(--flag-bg); border-color: var(--flag-border); color: var(--flag);
+    box-shadow: 0 0 8px var(--flag-bg);
+  }
+  .qa-toggle.active[data-value="na"] {
+    background: var(--na-bg); border-color: var(--na-border); color: var(--na-text);
+  }
+  .qa-toggle.active[data-value="approved"] {
+    background: var(--pass-bg); border-color: var(--pass-border); color: var(--pass);
+  }
+  .qa-toggle.active[data-value="not_approved"] {
+    background: var(--fail-bg); border-color: var(--fail-border); color: var(--fail);
+  }
+  .qa-toggle.active[data-value="pending"] {
+    background: var(--pending-bg); border-color: var(--pending-border); color: var(--pending);
+  }
+
+  /* Radio group */
+  .radio-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow);
+  }
+
+  .radio-option:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
+
+  .radio-option input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .radio-option input[type="radio"]:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--surface);
+  }
+
+  .radio-option:has(input:checked) {
+    border-color: var(--accent);
+    color: var(--text);
+    background: var(--accent-glow);
+  }
+
+  /* Simple radio group (no container boxes) */
+  .radio-group-simple {
+    display: flex;
+    gap: 20px;
+  }
+
+  .radio-simple {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .radio-simple input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .radio-simple input[type="radio"]:hover {
+    border-color: var(--text-dim);
+  }
+
+  .radio-simple input[type="radio"]:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--bg);
+  }
+
+  /* Experiment conditional fields */
+  .experiment-fields {
+    margin-top: 8px;
+  }
+
+  /* Experiment summary card */
+  .experiment-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .exp-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .exp-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+
+  .exp-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0 12px;
+  }
+
+  .subsection-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .subsection-divider {
+    border-top: 1px dashed var(--border);
+    margin: 24px 0 20px;
+  }
+
+  .checklist-pending {
+    padding: 8px 0;
+  }
+
+  .pending-text {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+
+  /* Error states */
+  .field-input.error {
+    border-color: var(--fail);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: var(--fail);
+    margin-top: 4px;
+  }
+
+  .checklist-item.error span {
+    color: var(--fail);
+  }
+
+  .radio-group-simple.error {
+    padding: 6px 8px;
+    margin: -6px -8px;
+    border-radius: var(--radius);
+    background: var(--fail-bg);
+  }
+
+  /* Checklist */
+  .checklist-group {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .checklist-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .checklist-group-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--section-content);
+    margin-bottom: 10px;
+  }
+
+  .checklist-group-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    transition: opacity 0.15s ease;
+  }
+
+  .checklist-item:hover {
+    opacity: 0.8;
+  }
+
+  .checklist-item input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    margin: 0;
+    margin-top: 1px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  .checklist-item input[type="checkbox"]:hover {
+    border-color: var(--text-dim);
+  }
+
+  .checklist-item input[type="checkbox"]:checked {
+    background: var(--pass);
+    border-color: var(--pass);
+  }
+
+  .checklist-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .checklist-item:has(input:checked) span {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dim);
+  }
+
+  .checklist-params {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 0 12px 28px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .checklist-params code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .param-row {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .param-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 95px;
+  }
+
+  .checklist-subgroup {
+    margin-bottom: 12px;
+  }
+
+  .checklist-subgroup:last-child {
+    margin-bottom: 0;
+  }
+
+  .checklist-subgroup-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    margin-left: 28px;
+  }
+
+  .checklist-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .checklist-two-col .checklist-subgroup {
+    margin-bottom: 0;
+  }
+
+  .checklist-two-col .checklist-subgroup-label {
+    margin-left: 0;
+  }
+
+  .checklist-two-col .checklist-item {
+    padding: 6px 0;
+  }
+
+  .tooltip-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    margin-left: 6px;
+    cursor: help;
+    position: relative;
+  }
+
+  .tooltip-trigger:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
+  }
+
+  .tooltip-trigger:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: normal;
+    width: 220px;
+    text-align: center;
+    z-index: 10;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .tooltip-trigger:hover::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 2px);
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--text);
+  }
+
+  .checklist-conditional {
+    margin: 8px 0 8px 28px;
+  }
+
+  .checklist-conditional .field-input {
+    margin-top: 6px;
+  }
+
+  .checklist-inline-field {
+    margin: 4px 0 8px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .checklist-inline-field .field-label {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .checklist-inline-field .field-input {
+    flex: 1;
+    max-width: 300px;
+  }
+
+  /* Schedule field */
+  .approval-item {
+    margin-bottom: 16px;
+  }
+
+  .approval-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .approval-subfield {
+    margin: 4px 0 0 28px;
+    max-width: 280px;
+  }
+
+  .schedule-inputs {
+    display: flex;
+    gap: 16px;
+  }
+
+  .schedule-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .schedule-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .schedule-input-group .field-input {
+    width: 160px;
+  }
+
+  .short-send-warning {
+    margin-top: 12px;
+    padding: 14px 16px;
+    background: var(--fail-bg);
+    border: 1px solid var(--fail-border);
+    border-radius: var(--radius);
+  }
+
+  .warning-message {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fail);
+    margin-bottom: 12px;
+  }
+
+  .warning-fields {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .warning-fields .field-label {
+    margin-bottom: 6px;
+  }
+
+  .warning-fields .field-input {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  /* Phase Labels */
+  .phase-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .phase-label:not(:first-child) {
+    margin-top: 32px;
+  }
+
+  .phase-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .phase-label.setup .phase-number {
+    background: var(--section-info);
+  }
+
+  .phase-label.verify .phase-number {
+    background: var(--section-content);
+  }
+
+  .phase-label.approve .phase-number {
+    background: var(--section-list);
+  }
+
+  .phase-text {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+
+  .phase-label.setup .phase-text {
+    color: var(--section-info);
+  }
+
+  .phase-label.verify .phase-text {
+    color: var(--section-content);
+  }
+
+  .phase-label.approve .phase-text {
+    color: var(--section-list);
+  }
+
+  /* Status bar */
+  .status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--statusbar-bg);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 11px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .status-pills {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .status-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .status-pill.pass { background: var(--pass-bg); color: var(--pass); }
+  .status-pill.fail { background: var(--fail-bg); color: var(--fail); }
+  .status-pill.flag { background: var(--flag-bg); color: var(--flag); }
+  .status-pill.remaining { background: var(--na-bg); color: var(--text-dim); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--pass);
+    color: var(--pass);
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--fail); color: var(--fail); }
+
+  @media (max-width: 640px) {
+    .field-grid, .field-grid-3 { grid-template-columns: 1fr; }
+    .field-grid .full-width, .field-grid-3 > * { grid-column: 1; }
+    .experiment-summary { grid-template-columns: 1fr; }
+    .checklist-two-col { grid-template-columns: 1fr; }
+    .schedule-inputs { flex-direction: column; gap: 12px; }
+    .schedule-input-group .field-input { width: 100%; }
+    .topbar { padding: 12px 16px; }
+    .main { padding: 20px 12px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-title">NAR Email QA</span>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" id="themeBtn">🌙</button>
+  </div>
+</div>
+
+<div class="main" id="app">
+
+  <!-- Phase 1: Campaign Info -->
+  <div class="phase-label setup">
+    <div class="phase-number">1</div>
+    <div class="phase-text">Campaign Info</div>
+  </div>
+
+  <!-- CAMPAIGN SETUP (combined) -->
+  <div class="section" data-section="info">
+    <div class="section-body" style="padding-top: 0;">
+
+      <!-- Campaign Info -->
+      <div class="field-grid">
+        <div class="field full-width">
+          <label class="field-label">Send Date</label>
+          <input class="field-input" type="date" data-field="send_date">
+        </div>
+        <div class="field">
+          <label class="field-label">Campaign Name</label>
+          <input class="field-input" type="text" data-field="campaign_name" placeholder="e.g. 2025_02_MemberBenefit_Promo">
+        </div>
+        <div class="field">
+          <label class="field-label">Campaign ID</label>
+          <input class="field-input" type="text" data-field="campaign_id" placeholder="Iterable campaign ID">
+        </div>
+        <div class="field full-width">
+          <label class="field-label">Jira Ticket</label>
+          <input class="field-input" type="url" data-field="jira_link" placeholder="https://yourorg.atlassian.net/browse/...">
+        </div>
+        <div class="field full-width">
+          <label class="field-label">Notes</label>
+          <textarea class="field-input" data-field="notes" placeholder="Any context, flags, or special instructions..."></textarea>
+        </div>
+      </div>
+
+      <!-- Audience Strategy -->
+      <div class="subsection-divider"></div>
+      <div class="subsection-label">Audience Strategy</div>
+      <div class="field-grid">
+        <div class="field full-width">
+          <div class="field-sublabel">Describe the general audience strategy — why this group? Anything unique about them?</div>
+          <textarea class="field-input" data-field="audience_strategy" placeholder="e.g. Active members who haven't renewed in 30+ days, excluding those with open support tickets..."></textarea>
+        </div>
+      </div>
+
+      <!-- Experiment -->
+      <div class="subsection-divider"></div>
+      <div class="field-grid">
+        <div class="field full-width">
+          <label class="field-label">Experiment set?</label>
+          <div class="radio-group-simple" data-field="is_experiment" id="experimentToggle">
+            <label class="radio-simple">
+              <input type="radio" name="is_experiment" value="yes" onchange="toggleExperimentFields()">
+              <span>Yes</span>
+            </label>
+            <label class="radio-simple">
+              <input type="radio" name="is_experiment" value="no" onchange="toggleExperimentFields()">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiment Details (only shows if yes) -->
+      <div class="experiment-section" id="experimentSection" style="display: none;">
+        <div class="subsection-divider"></div>
+        <div class="subsection-label">Experiment Details</div>
+        <div class="field-grid">
+          <div class="field">
+            <label class="field-label">Experiment ID</label>
+            <input class="field-input" type="text" data-field="experiment_id" placeholder="Iterable experiment ID">
+          </div>
+          <div class="field">
+            <label class="field-label">Number of Versions</label>
+            <input class="field-input" type="number" data-field="num_versions" placeholder="e.g. 2" min="2">
+          </div>
+          <div class="field">
+            <label class="field-label">Winning Metric</label>
+            <div class="radio-group-simple" data-field="winning_metric">
+              <label class="radio-simple">
+                <input type="radio" name="winning_metric" value="opens">
+                <span>Opens</span>
+              </label>
+              <label class="radio-simple">
+                <input type="radio" name="winning_metric" value="clicks">
+                <span>Clicks</span>
+              </label>
+            </div>
+          </div>
+          <div class="field full-width">
+            <label class="field-label">Experiment Goal</label>
+            <div class="field-sublabel">From experiment brief — what are we trying to learn?</div>
+            <textarea class="field-input" data-field="experiment_goal" placeholder="e.g. Does personalized subject line increase opens?"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase 2: QA Checklist -->
+  <div class="phase-label verify">
+    <div class="phase-number">2</div>
+    <div class="phase-text">QA Checklist</div>
+  </div>
+
+  <!-- QA CHECKLIST -->
+  <div class="section" data-section="checklist">
+    <div class="section-body" style="padding-top: 0;">
+
+      <!-- Device Previews -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Device Previews</div>
+        <div class="checklist-two-col">
+          <div class="checklist-subgroup">
+            <div class="checklist-subgroup-label">Mobile</div>
+            <label class="checklist-item">
+              <input type="checkbox" data-check="preview_iphone">
+              <span>iPhone</span>
+            </label>
+            <label class="checklist-item">
+              <input type="checkbox" data-check="preview_samsung">
+              <span>Samsung</span>
+            </label>
+          </div>
+          <div class="checklist-subgroup">
+            <div class="checklist-subgroup-label">Desktop</div>
+            <label class="checklist-item">
+              <input type="checkbox" data-check="preview_outlook">
+              <span>Outlook</span>
+            </label>
+            <label class="checklist-item">
+              <input type="checkbox" data-check="preview_gmail">
+              <span>Gmail</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Content</div>
+        <div class="checklist-group-note">Read all content aloud as final review</div>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="content_body">
+          <span>Body copy</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="preview_hack">
+          <span>Preview text hack snippet placed at top of email body</span>
+        </label>
+      </div>
+
+      <!-- Details -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Details</div>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="labels_match">
+          <span>Labels set</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="subject_set">
+          <span>Subject line set</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="preheader_set">
+          <span>Preheader set</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="preheader_spaces">
+          <span>Preheader has 3 extra spaces at end</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="link_params_set" onchange="document.getElementById('missingParamsField').style.display = this.checked ? 'none' : 'block'">
+          <span>Link parameters set</span>
+        </label>
+        <div class="checklist-subgroup" style="margin-left: 28px; margin-top: 4px;">
+          <div class="checklist-params" style="margin-bottom: 8px;">
+            <div class="param-row"><span class="param-key">user:</span> <code>{{defaultIfEmpty Profile_ID "null"}}</code></div>
+            <div class="param-row"><span class="param-key">itid:</span> <code>{{campaignId}}</code></div>
+            <div class="param-row"><span class="param-key">utm_source:</span> <code>Iterable</code></div>
+            <div class="param-row"><span class="param-key">utm_medium:</span> <code>email</code></div>
+            <div class="param-row"><span class="param-key">utm_campaign:</span> <code>(provided by stakeholder)</code></div>
+          </div>
+        </div>
+        <div class="checklist-conditional" id="missingParamsField" style="display: none;">
+          <label class="field-label">If any missing, note why:</label>
+          <input class="field-input" type="text" data-field="missing_params_reason" placeholder="Reason for missing parameters...">
+        </div>
+      </div>
+
+      <!-- Tracking -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Tracking</div>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="cid_on_links">
+          <span>Links have CID parameter</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="links_match_brief">
+          <span>All links match briefing</span>
+        </label>
+      </div>
+
+      <!-- Lists -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Lists</div>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="lists_match_strategy">
+          <span>Attached lists match Audience Strategy</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="suppression_attached">
+          <span>Suppression lists attached (Bounces 2026, Global Unsubscribes)</span>
+        </label>
+      </div>
+
+      <!-- Jira -->
+      <div class="checklist-group">
+        <div class="checklist-group-label">Jira</div>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="iterable_link_set">
+          <span>Iterable Campaign link set</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" data-check="view_online_link_set">
+          <span>View Online link set</span>
+        </label>
+      </div>
+
+      <!-- Experiment Checklist (hidden until yes/no selected) -->
+      <div class="checklist-group" id="experimentChecklist" style="display: none;">
+        <div class="checklist-group-label">Experiment</div>
+        <!-- Shows when experiment = yes -->
+        <div id="experimentYesItems" style="display: none;">
+          <label class="checklist-item">
+            <input type="checkbox" data-check="exp_versions_match">
+            <span>Test versions match briefing</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" data-check="exp_config_correct">
+            <span>Experiment configuration correct (metric, versions)</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" data-check="exp_goal_aligned">
+            <span>Setup aligns with experiment goal</span>
+          </label>
+        </div>
+        <!-- Shows when experiment = no -->
+        <div id="experimentNoItems" style="display: none;">
+          <label class="checklist-item">
+            <input type="checkbox" data-check="exp_none_confirmed">
+            <span>Confirm there is NO experiment set on the review screen</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase 3: Approve -->
+  <div class="phase-label approve">
+    <div class="phase-number">3</div>
+    <div class="phase-text">Approve</div>
+  </div>
+
+  <!-- APPROVALS & SIGN-OFF -->
+  <div class="section" data-section="signoff">
+    <div class="section-body" style="padding-top: 0;">
+      <div class="field-grid">
+        <div class="field full-width">
+          <label class="checklist-item" style="padding: 0;">
+            <input type="checkbox" data-check="stakeholder_approved">
+            <span>Approved by stakeholder in Jira</span>
+          </label>
+        </div>
+        <div class="field">
+          <label class="field-label">Stakeholder Name</label>
+          <input class="field-input" type="text" data-field="stakeholder_name" placeholder="Who approved?">
+        </div>
+        <div class="field">
+          <label class="field-label">QA'd By</label>
+          <input class="field-input" type="text" data-field="qa_by" placeholder="Your name">
+        </div>
+      </div>
+
+      <div class="field-grid" style="margin-top: 20px;">
+        <div class="field full-width">
+          <label class="field-label">Scheduled Send</label>
+          <div class="schedule-inputs" style="margin-top: 8px;">
+            <div class="schedule-input-group">
+              <label class="schedule-label">Date</label>
+              <input class="field-input" type="date" data-field="scheduled_date" id="scheduledDate" onchange="checkScheduleTime()">
+            </div>
+            <div class="schedule-input-group">
+              <label class="schedule-label">Time</label>
+              <input class="field-input" type="time" data-field="scheduled_time" id="scheduledTime" onchange="checkScheduleTime()">
+            </div>
+          </div>
+          <div class="short-send-warning" id="shortSendWarning" style="display: none;">
+            <div class="warning-message">⚠️ Scheduled time is less than 2 hours from now. Recommended scheduling is at least 2 hours post approval.</div>
+            <div class="warning-fields">
+              <label class="field-label">Why is a short send time needed?</label>
+              <textarea class="field-input" data-field="short_send_reason" placeholder="Reason for expedited send..." rows="2"></textarea>
+              <label class="checklist-item" style="margin-top: 8px;">
+                <input type="checkbox" data-check="short_send_approved">
+                <span>I approve this short send time</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="status-pills" id="statusPills"></div>
+  <button class="btn btn-primary" id="submitBtn2" onclick="submitForm()">Submit QA</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // =============================================
+  // CONFIG: Update with your Apps Script URL
+  // =============================================
+  const GOOGLE_SCRIPT_URL = '';
+
+  // State
+  const formData = {};
+
+  // Theme
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('qa-theme', next);
+  }
+
+  // Load saved theme
+  (function() {
+    const saved = localStorage.getItem('qa-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('themeBtn').textContent = saved === 'light' ? '🌙' : '☀️';
+    }
+  })();
+
+  // Initialize QA toggle groups
+  function initToggles() {
+    document.querySelectorAll('.qa-toggle-group[data-qa]').forEach(group => {
+      ['Pass', 'Fail', 'Flag', 'N/A'].forEach(label => {
+        const val = label === 'N/A' ? 'na' : label.toLowerCase();
+        const btn = document.createElement('button');
+        btn.className = 'qa-toggle';
+        btn.dataset.value = val;
+        btn.textContent = label;
+        btn.onclick = () => selectToggle(group, btn);
+        group.appendChild(btn);
+      });
+    });
+
+    document.querySelectorAll('.qa-toggle-group[data-approval]').forEach(group => {
+      [['Approved', 'approved'], ['Not Approved', 'not_approved'], ['Pending', 'pending']].forEach(([label, val]) => {
+        const btn = document.createElement('button');
+        btn.className = 'qa-toggle';
+        btn.dataset.value = val;
+        btn.textContent = label;
+        btn.onclick = () => selectToggle(group, btn);
+        group.appendChild(btn);
+      });
+    });
+  }
+
+  function selectToggle(group, selected) {
+    group.querySelectorAll('.qa-toggle').forEach(b => b.classList.remove('active'));
+    selected.classList.add('active');
+    formData[group.dataset.field] = selected.dataset.value;
+    updateCounts();
+  }
+
+  function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  function toggleExperimentFields() {
+    const isYes = document.querySelector('input[name="is_experiment"][value="yes"]').checked;
+    const isNo = document.querySelector('input[name="is_experiment"][value="no"]').checked;
+    const sectionEl = document.getElementById('experimentSection');
+    const checklistEl = document.getElementById('experimentChecklist');
+    const yesItems = document.getElementById('experimentYesItems');
+    const noItems = document.getElementById('experimentNoItems');
+    
+    // Show/hide experiment details section
+    sectionEl.style.display = isYes ? 'block' : 'none';
+    
+    // Show/hide entire checklist section when yes or no selected
+    checklistEl.style.display = (isYes || isNo) ? 'block' : 'none';
+    
+    // Show/hide appropriate checklist items
+    yesItems.style.display = isYes ? 'block' : 'none';
+    noItems.style.display = isNo ? 'block' : 'none';
+  }
+
+  function checkScheduleTime() {
+    const dateInput = document.getElementById('scheduledDate');
+    const timeInput = document.getElementById('scheduledTime');
+    const warning = document.getElementById('shortSendWarning');
+    
+    if (!dateInput.value || !timeInput.value) {
+      warning.style.display = 'none';
+      return;
+    }
+
+    const scheduledTime = new Date(dateInput.value + 'T' + timeInput.value);
+    const now = new Date();
+    const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+
+    if (scheduledTime < twoHoursFromNow) {
+      warning.style.display = 'block';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+
+  function updateCounts() {
+    // No QA toggle fields currently - will add back with checklist
+  }
+
+  function updateStatusBar() {
+    // No QA fields currently - status bar empty for now
+    const el = document.getElementById('statusPills');
+    el.innerHTML = '';
+  }
+
+  function gatherFormData() {
+    document.querySelectorAll('.field-input').forEach(input => {
+      if (input.dataset.field) {
+        formData[input.dataset.field] = input.value;
+      }
+    });
+    // Handle radio buttons (both styles)
+    document.querySelectorAll('.radio-group, .radio-group-simple').forEach(group => {
+      const field = group.dataset.field;
+      const checked = group.querySelector('input[type="radio"]:checked');
+      if (checked) formData[field] = checked.value;
+    });
+    // Handle checklist checkboxes
+    document.querySelectorAll('input[data-check]').forEach(cb => {
+      formData[cb.dataset.check] = cb.checked ? 'yes' : 'no';
+    });
+    formData.qa_date = new Date().toISOString();
+    return { ...formData };
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.field-error').forEach(el => el.remove());
+  }
+
+  function markError(field, message) {
+    field.classList.add('error');
+  }
+
+  function validateForm() {
+    clearErrors();
+    let isValid = true;
+    let firstError = null;
+
+    // Campaign Info required fields
+    const requiredFields = [
+      { selector: '[data-field="send_date"]', name: 'Send Date' },
+      { selector: '[data-field="campaign_name"]', name: 'Campaign Name' },
+      { selector: '[data-field="campaign_id"]', name: 'Campaign ID' },
+      { selector: '[data-field="jira_link"]', name: 'Jira Ticket' },
+      { selector: '[data-field="audience_strategy"]', name: 'Audience Strategy' },
+    ];
+
+    requiredFields.forEach(({ selector }) => {
+      const field = document.querySelector(selector);
+      if (field && !field.value.trim()) {
+        markError(field);
+        if (!firstError) firstError = field;
+        isValid = false;
+      }
+    });
+
+    // Experiment set required
+    const expYes = document.querySelector('input[name="is_experiment"][value="yes"]');
+    const expNo = document.querySelector('input[name="is_experiment"][value="no"]');
+    if (!expYes.checked && !expNo.checked) {
+      const radioGroup = document.querySelector('#experimentToggle');
+      if (radioGroup) radioGroup.classList.add('error');
+      if (!firstError) firstError = radioGroup;
+      isValid = false;
+    }
+
+    // If experiment = yes, experiment details required
+    if (expYes.checked) {
+      const expFields = [
+        '[data-field="experiment_id"]',
+        '[data-field="num_versions"]',
+        '[data-field="experiment_goal"]',
+      ];
+      expFields.forEach(selector => {
+        const field = document.querySelector(selector);
+        if (field && !field.value.trim()) {
+          markError(field);
+          if (!firstError) firstError = field;
+          isValid = false;
+        }
+      });
+      // Winning metric radio
+      const winningMetric = document.querySelector('input[name="winning_metric"]:checked');
+      if (!winningMetric) {
+        const metricGroup = document.querySelector('[data-field="winning_metric"]');
+        if (metricGroup) metricGroup.classList.add('error');
+        if (!firstError) firstError = metricGroup;
+        isValid = false;
+      }
+    }
+
+    // Required checkboxes in QA Checklist
+    const requiredChecks = [
+      'link_params_set',
+      'cid_on_links',
+      'links_match_brief',
+      'lists_match_strategy',
+      'suppression_attached',
+      'iterable_link_set',
+      'view_online_link_set',
+    ];
+
+    requiredChecks.forEach(checkName => {
+      const checkbox = document.querySelector(`[data-check="${checkName}"]`);
+      if (checkbox && !checkbox.checked) {
+        const label = checkbox.closest('.checklist-item');
+        if (label) label.classList.add('error');
+        if (!firstError) firstError = checkbox;
+        isValid = false;
+      }
+    });
+
+    // Experiment checklist items (if shown)
+    if (expYes.checked) {
+      const expChecks = ['exp_versions_match', 'exp_config_correct', 'exp_goal_aligned'];
+      expChecks.forEach(checkName => {
+        const checkbox = document.querySelector(`[data-check="${checkName}"]`);
+        if (checkbox && !checkbox.checked) {
+          const label = checkbox.closest('.checklist-item');
+          if (label) label.classList.add('error');
+          if (!firstError) firstError = checkbox;
+          isValid = false;
+        }
+      });
+    } else if (expNo.checked) {
+      const checkbox = document.querySelector('[data-check="exp_none_confirmed"]');
+      if (checkbox && !checkbox.checked) {
+        const label = checkbox.closest('.checklist-item');
+        if (label) label.classList.add('error');
+        if (!firstError) firstError = checkbox;
+        isValid = false;
+      }
+    }
+
+    // Approve section required
+    const stakeholderCheck = document.querySelector('[data-check="stakeholder_approved"]');
+    if (stakeholderCheck && !stakeholderCheck.checked) {
+      const label = stakeholderCheck.closest('.checklist-item');
+      if (label) label.classList.add('error');
+      if (!firstError) firstError = stakeholderCheck;
+      isValid = false;
+    }
+
+    const approveFields = [
+      '[data-field="stakeholder_name"]',
+      '[data-field="qa_by"]',
+      '[data-field="scheduled_date"]',
+      '[data-field="scheduled_time"]',
+    ];
+    approveFields.forEach(selector => {
+      const field = document.querySelector(selector);
+      if (field && !field.value.trim()) {
+        markError(field);
+        if (!firstError) firstError = field;
+        isValid = false;
+      }
+    });
+
+    // Short send approval if warning shown
+    const shortSendWarning = document.getElementById('shortSendWarning');
+    if (shortSendWarning && shortSendWarning.style.display !== 'none') {
+      const shortSendCheck = document.querySelector('[data-check="short_send_approved"]');
+      if (shortSendCheck && !shortSendCheck.checked) {
+        const label = shortSendCheck.closest('.checklist-item');
+        if (label) label.classList.add('error');
+        if (!firstError) firstError = shortSendCheck;
+        isValid = false;
+      }
+    }
+
+    // Scroll to first error
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return isValid;
+  }
+
+  async function submitForm() {
+    if (!validateForm()) {
+      showToast('Please complete all required fields', true);
+      return;
+    }
+
+    const data = gatherFormData();
+
+    if (!GOOGLE_SCRIPT_URL) {
+      console.log('QA Submission (no backend configured):', data);
+      showToast('Demo mode — check console. Set GOOGLE_SCRIPT_URL to connect.');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn2');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      showToast('QA submitted to Google Sheet ✓');
+    } catch (err) {
+      showToast('Error submitting: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit QA';
+    }
+  }
+
+  function resetForm() {
+    if (!confirm('Clear all fields?')) return;
+    document.querySelectorAll('.field-input').forEach(i => {
+      if (i.tagName === 'SELECT') i.selectedIndex = 0;
+      else i.value = '';
+    });
+    document.querySelectorAll('.qa-toggle').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+    document.getElementById('experimentSection').style.display = 'none';
+    document.getElementById('experimentChecklist').style.display = 'none';
+    document.getElementById('experimentYesItems').style.display = 'none';
+    document.getElementById('experimentNoItems').style.display = 'none';
+    document.getElementById('shortSendWarning').style.display = 'none';
+    Object.keys(formData).forEach(k => delete formData[k]);
+    updateCounts();
+    showToast('Form cleared');
+  }
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  initToggles();
+  updateCounts();
+
+  // Clear errors on input
+  document.querySelectorAll('.field-input').forEach(field => {
+    field.addEventListener('input', () => field.classList.remove('error'));
+    field.addEventListener('change', () => field.classList.remove('error'));
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const label = cb.closest('.checklist-item');
+      if (label) label.classList.remove('error');
+    });
+  });
+
+  document.querySelectorAll('input[type="radio"]').forEach(rb => {
+    rb.addEventListener('change', () => {
+      const group = rb.closest('.radio-group-simple');
+      if (group) group.classList.remove('error');
+    });
+  });
+</script>
+</body>
+</html>
