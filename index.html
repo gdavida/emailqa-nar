@@ -147,59 +147,6 @@
 
   .theme-toggle:hover { border-color: var(--text-dim); color: var(--text); }
 
-  .topbar-identity {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 5px 6px 5px 14px;
-    transition: border-color 0.15s ease;
-  }
-
-  .topbar-identity:focus-within {
-    border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .topbar-identity.error {
-    border-color: var(--fail);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-  }
-
-  .topbar-identity-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dim);
-    white-space: nowrap;
-    cursor: text;
-    letter-spacing: 0.02em;
-  }
-
-  .topbar-identity-input {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 3px 8px;
-    width: 120px;
-    background: var(--bg);
-    border: none;
-    border-radius: 14px;
-    color: var(--text);
-    outline: none;
-    transition: all 0.15s ease;
-  }
-
-  .topbar-identity-input::placeholder { color: var(--text-dim); font-weight: 400; }
-
-  .topbar-divider {
-    width: 1px;
-    height: 24px;
-    background: var(--border);
-    flex-shrink: 0;
-  }
-
   .btn {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
@@ -1388,9 +1335,6 @@
     .schedule-inputs { flex-direction: column; gap: 12px; }
     .schedule-input-group .field-input { width: 100%; }
     .topbar { padding: 12px 16px; }
-    .topbar-identity-label { display: none; }
-    .topbar-identity-input { width: 80px; font-size: 12px; }
-    .topbar-divider { display: none; }
     .main { padding: 20px 12px 80px; }
     .drafts-dropdown { width: calc(100vw - 24px); right: -12px; }
   }
@@ -1405,11 +1349,6 @@
   </div>
   <div class="topbar-right">
     <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
-    <div class="topbar-identity">
-      <label class="topbar-identity-label" for="topbarQaBy">QA'd by</label>
-      <input class="topbar-identity-input" type="text" data-field="qa_by" placeholder="Your name" id="topbarQaBy">
-    </div>
-    <div class="topbar-divider"></div>
     <div class="drafts-container">
       <button class="btn-load-draft" onclick="toggleDraftsDropdown()" id="draftsBtn">Load Draft</button>
       <div class="drafts-dropdown" id="draftsDropdown">
@@ -1436,6 +1375,13 @@
     <div class="section-body" style="padding-top: 0;">
 
       <!-- Campaign Info -->
+      <div class="field-grid">
+        <div class="field full-width">
+          <label class="field-label">QA'd By</label>
+          <input class="field-input" type="text" data-field="qa_by" placeholder="Your name" id="topbarQaBy">
+        </div>
+      </div>
+      <div class="subsection-divider"></div>
       <div class="field-grid">
         <div class="field">
           <label class="field-label">Campaign Name</label>
@@ -2163,9 +2109,6 @@
       if (i.tagName === 'SELECT') i.selectedIndex = 0;
       else i.value = '';
     });
-    // Clear topbar name input
-    var topbarName = document.getElementById('topbarQaBy');
-    if (topbarName) topbarName.value = '';
     document.querySelectorAll('.qa-toggle').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
     document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
@@ -2312,10 +2255,8 @@
 
     if (!qaBy) {
       showToast('Enter your name before saving', true);
-      var pill = document.querySelector('.topbar-identity');
       var field = document.getElementById('topbarQaBy');
-      if (pill) pill.classList.add('error');
-      if (field) field.focus();
+      if (field) { field.classList.add('error'); field.focus(); }
       return;
     }
 
@@ -2450,15 +2391,7 @@
     field.addEventListener('change', () => field.classList.remove('error'));
   });
 
-  // Topbar name input error clearing
-  var topbarQaBy = document.getElementById('topbarQaBy');
-  if (topbarQaBy) {
-    topbarQaBy.addEventListener('input', function() {
-      topbarQaBy.classList.remove('error');
-      var pill = document.querySelector('.topbar-identity');
-      if (pill) pill.classList.remove('error');
-    });
-  }
+  // Clear form reset also clears QA name
 
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', () => {
