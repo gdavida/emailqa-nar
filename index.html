@@ -147,6 +147,59 @@
 
   .theme-toggle:hover { border-color: var(--text-dim); color: var(--text); }
 
+  .topbar-identity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 6px 5px 14px;
+    transition: border-color 0.15s ease;
+  }
+
+  .topbar-identity:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .topbar-identity.error {
+    border-color: var(--fail);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+
+  .topbar-identity-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    white-space: nowrap;
+    cursor: text;
+    letter-spacing: 0.02em;
+  }
+
+  .topbar-identity-input {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 8px;
+    width: 120px;
+    background: var(--bg);
+    border: none;
+    border-radius: 14px;
+    color: var(--text);
+    outline: none;
+    transition: all 0.15s ease;
+  }
+
+  .topbar-identity-input::placeholder { color: var(--text-dim); font-weight: 400; }
+
+  .topbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
   .btn {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
@@ -918,6 +971,21 @@
   .status-pill.flag { background: var(--flag-bg); color: var(--flag); }
   .status-pill.remaining { background: var(--na-bg); color: var(--text-dim); }
 
+  .save-draft-link {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 8px;
+    transition: color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .save-draft-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -1129,9 +1197,87 @@
     100% { transform: translate(-50%, -50%) scale(1); }
   }
 
-  /* Drafts dropdown */
+  /* Drafts */
   .drafts-container {
     position: relative;
+  }
+
+  .btn-save-draft {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  .btn-save-draft:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
+
+  .btn-save-draft:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .btn-save-draft .spinner {
+    display: none;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  .btn-save-draft.saving .spinner {
+    display: block;
+  }
+
+  .btn-save-draft.saving .btn-label {
+    display: none;
+  }
+
+  .btn-save-draft.saved {
+    background: var(--pass-bg);
+    border-color: var(--pass);
+    color: var(--pass);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .btn-load-draft {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+  }
+
+  .btn-load-draft:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-dim);
+    color: var(--text);
   }
 
   .drafts-dropdown {
@@ -1242,6 +1388,9 @@
     .schedule-inputs { flex-direction: column; gap: 12px; }
     .schedule-input-group .field-input { width: 100%; }
     .topbar { padding: 12px 16px; }
+    .topbar-identity-label { display: none; }
+    .topbar-identity-input { width: 80px; font-size: 12px; }
+    .topbar-divider { display: none; }
     .main { padding: 20px 12px 80px; }
     .drafts-dropdown { width: calc(100vw - 24px); right: -12px; }
   }
@@ -1256,9 +1405,13 @@
   </div>
   <div class="topbar-right">
     <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
-    <button class="btn btn-primary" onclick="saveDraft()" id="saveDraftBtn">Save Draft</button>
+    <div class="topbar-identity">
+      <label class="topbar-identity-label" for="topbarQaBy">QA'd by</label>
+      <input class="topbar-identity-input" type="text" data-field="qa_by" placeholder="Your name" id="topbarQaBy">
+    </div>
+    <div class="topbar-divider"></div>
     <div class="drafts-container">
-      <button class="btn" onclick="toggleDraftsDropdown()" id="draftsBtn">Load Draft</button>
+      <button class="btn-load-draft" onclick="toggleDraftsDropdown()" id="draftsBtn">Load Draft</button>
       <div class="drafts-dropdown" id="draftsDropdown">
         <div class="drafts-divider" id="draftsLabel">Saved Drafts</div>
         <div class="drafts-list" id="draftsList">
@@ -1544,10 +1697,6 @@
           <label class="field-label">Stakeholder Name</label>
           <input class="field-input" type="text" data-field="stakeholder_name" placeholder="Who approved?">
         </div>
-        <div class="field">
-          <label class="field-label">QA'd By</label>
-          <input class="field-input" type="text" data-field="qa_by" placeholder="Your name">
-        </div>
       </div>
 
       <div class="field-grid" style="margin-top: 20px;">
@@ -1585,6 +1734,7 @@
 <div class="status-bar">
   <div class="status-pills" id="statusPills"></div>
   <button class="btn btn-primary" id="submitBtn2" onclick="submitForm()">Submit QA</button>
+  <a href="#" class="save-draft-link" onclick="event.preventDefault(); saveDraft();">or save as draft</a>
 </div>
 
 <!-- Toast -->
@@ -1594,7 +1744,7 @@
   // =============================================
   // CONFIG: Update with your Apps Script URL
   // =============================================
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2drh2GDC3_IbZXFzBgpjaJPSjYHAycMulcpxwYxgN440zBijAknwScYQvHcodpF_D/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7DpLP7IRUJzgqVSJlzG7p7ykII2_C6F3BG90pVSiwsjfjMASWDqTiZXyjNXBWaMBf/exec';
 
   // State
   const formData = {};
@@ -1706,8 +1856,8 @@
   }
 
   function gatherFormData() {
-    document.querySelectorAll('.field-input').forEach(input => {
-      if (input.dataset.field) {
+    document.querySelectorAll('[data-field]').forEach(input => {
+      if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') {
         formData[input.dataset.field] = input.value;
       }
     });
@@ -1741,6 +1891,7 @@
 
     // Campaign Info required fields
     const requiredFields = [
+      { selector: '[data-field="qa_by"]', name: 'QA\'d By' },
       { selector: '[data-field="campaign_name"]', name: 'Campaign Name' },
       { selector: '[data-field="campaign_id"]', name: 'Campaign ID' },
       { selector: '[data-field="jira_link"]', name: 'Jira Ticket' },
@@ -1857,7 +2008,6 @@
 
     const approveFields = [
       '[data-field="stakeholder_name"]',
-      '[data-field="qa_by"]',
       '[data-field="scheduled_date"]',
       '[data-field="scheduled_time"]',
     ];
@@ -2013,6 +2163,9 @@
       if (i.tagName === 'SELECT') i.selectedIndex = 0;
       else i.value = '';
     });
+    // Clear topbar name input
+    var topbarName = document.getElementById('topbarQaBy');
+    if (topbarName) topbarName.value = '';
     document.querySelectorAll('.qa-toggle').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
     document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
@@ -2086,6 +2239,24 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function formatDraftDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+      var d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
+      var month = d.getMonth() + 1;
+      var day = d.getDate();
+      var hour = d.getHours();
+      var min = d.getMinutes();
+      var ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      min = min < 10 ? '0' + min : min;
+      return month + '/' + day + ' ' + hour + ':' + min + ' ' + ampm;
+    } catch (e) {
+      return String(dateStr);
+    }
+  }
+
   async function fetchDraftsList() {
     var listEl = document.getElementById('draftsList');
     var labelEl = document.getElementById('draftsLabel');
@@ -2103,10 +2274,11 @@
       labelEl.style.display = 'block';
       listEl.innerHTML = result.drafts.map(function(d) {
         var safeName = escapeHtml(d.campaign_name);
+        var displayDate = formatDraftDate(d.last_saved);
         return '<div class="draft-item" data-draft-name="' + safeName + '">'
           + '<div class="draft-info" onclick="loadDraftByEl(this.parentElement)">'
           + '<div class="draft-name">' + safeName + '</div>'
-          + '<div class="draft-meta">' + escapeHtml(d.saved_by) + ' · ' + escapeHtml(d.last_saved) + '</div>'
+          + '<div class="draft-meta">' + escapeHtml(d.saved_by) + ' · ' + displayDate + '</div>'
           + '</div>'
           + '<button class="draft-delete" onclick="event.stopPropagation(); deleteDraftByEl(this.parentElement)" title="Delete draft">×</button>'
           + '</div>';
@@ -2136,15 +2308,26 @@
   async function saveDraft() {
     var data = gatherFormData();
     var campaignName = (data.campaign_name || '').trim();
+    var qaBy = (data.qa_by || '').trim();
 
-    if (!campaignName) {
-      showToast('Enter a Campaign Name before saving draft', true);
+    if (!qaBy) {
+      showToast('Enter your name before saving', true);
+      var pill = document.querySelector('.topbar-identity');
+      var field = document.getElementById('topbarQaBy');
+      if (pill) pill.classList.add('error');
+      if (field) field.focus();
       return;
     }
 
-    var btn = document.getElementById('saveDraftBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
+    if (!campaignName) {
+      showToast('Enter a Campaign Name before saving draft', true);
+      var field = document.querySelector('[data-field="campaign_name"]');
+      if (field) { field.classList.add('error'); field.focus(); }
+      return;
+    }
+
+    var link = document.querySelector('.save-draft-link');
+    if (link) link.textContent = 'saving...';
 
     data._action = 'save_draft';
 
@@ -2157,12 +2340,16 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+
+      if (link) {
+        link.textContent = '✓ draft saved';
+        setTimeout(function() { link.textContent = 'or save as draft'; }, 2500);
+      }
+
       showToast('Draft saved: ' + campaignName);
     } catch (err) {
       showToast('Error saving draft: ' + err.message, true);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Save Draft';
+      if (link) link.textContent = 'or save as draft';
     }
   }
 
@@ -2217,10 +2404,12 @@
     clearForm();
 
     // Restore text/textarea/date/time/number fields
-    document.querySelectorAll('.field-input').forEach(function(input) {
-      var field = input.dataset.field;
-      if (field && data[field] !== undefined && data[field] !== null) {
-        input.value = data[field];
+    document.querySelectorAll('[data-field]').forEach(function(input) {
+      if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') {
+        var field = input.dataset.field;
+        if (field && data[field] !== undefined && data[field] !== null) {
+          input.value = data[field];
+        }
       }
     });
 
@@ -2260,6 +2449,16 @@
     field.addEventListener('input', () => field.classList.remove('error'));
     field.addEventListener('change', () => field.classList.remove('error'));
   });
+
+  // Topbar name input error clearing
+  var topbarQaBy = document.getElementById('topbarQaBy');
+  if (topbarQaBy) {
+    topbarQaBy.addEventListener('input', function() {
+      topbarQaBy.classList.remove('error');
+      var pill = document.querySelector('.topbar-identity');
+      if (pill) pill.classList.remove('error');
+    });
+  }
 
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', () => {
