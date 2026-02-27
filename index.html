@@ -921,9 +921,9 @@
   /* Toast */
   .toast {
     position: fixed;
-    bottom: 70px;
+    top: 64px;
     left: 50%;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateX(-50%) translateY(-10px);
     background: var(--surface);
     border: 1px solid var(--pass);
     color: var(--pass);
@@ -1152,33 +1152,8 @@
     display: block;
   }
 
-  .drafts-header {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .drafts-save-btn {
-    width: 100%;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 18px;
-    border-radius: var(--radius);
-    border: 1px solid var(--accent);
-    background: var(--accent);
-    color: white;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .drafts-save-btn:hover {
-    background: #6B7BFF;
-    border-color: #6B7BFF;
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
-
   .drafts-list {
-    max-height: 340px;
+    max-height: 380px;
     overflow-y: auto;
   }
 
@@ -1281,12 +1256,10 @@
   </div>
   <div class="topbar-right">
     <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
+    <button class="btn btn-primary" onclick="saveDraft()" id="saveDraftBtn">Save Draft</button>
     <div class="drafts-container">
-      <button class="btn" onclick="toggleDraftsDropdown()" id="draftsBtn">Drafts</button>
+      <button class="btn" onclick="toggleDraftsDropdown()" id="draftsBtn">Load Draft</button>
       <div class="drafts-dropdown" id="draftsDropdown">
-        <div class="drafts-header">
-          <button class="drafts-save-btn" onclick="saveDraft()">Save Current as Draft</button>
-        </div>
         <div class="drafts-divider" id="draftsLabel">Saved Drafts</div>
         <div class="drafts-list" id="draftsList">
           <div class="drafts-empty">Loading...</div>
@@ -2171,13 +2144,21 @@
 
   async function saveDraft() {
     var data = gatherFormData();
+    var campaignName = (data.campaign_name || '').trim();
 
-    if (!data.campaign_name || !data.campaign_name.trim()) {
+    if (!campaignName) {
       showToast('Enter a Campaign Name before saving draft', true);
       return;
     }
 
+    var btn = document.getElementById('saveDraftBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
     data._action = 'save_draft';
+
+    // Log for debugging
+    console.log('Saving draft:', campaignName, data);
 
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
@@ -2186,11 +2167,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      showToast('Draft saved: ' + data.campaign_name);
-      // Brief delay to let the sheet update before refreshing list
-      setTimeout(fetchDraftsList, 1500);
+      showToast('Draft saved: ' + campaignName);
     } catch (err) {
       showToast('Error saving draft: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Draft';
     }
   }
 
