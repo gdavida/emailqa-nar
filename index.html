@@ -1129,6 +1129,136 @@
     100% { transform: translate(-50%, -50%) scale(1); }
   }
 
+  /* Drafts dropdown */
+  .drafts-container {
+    position: relative;
+  }
+
+  .drafts-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    overflow: hidden;
+  }
+
+  .drafts-dropdown.open {
+    display: block;
+  }
+
+  .drafts-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drafts-save-btn {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .drafts-save-btn:hover {
+    background: #6B7BFF;
+    border-color: #6B7BFF;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .drafts-list {
+    max-height: 340px;
+    overflow-y: auto;
+  }
+
+  .draft-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .draft-item:hover {
+    background: var(--surface-hover);
+  }
+
+  .draft-item:last-child {
+    border-bottom: none;
+  }
+
+  .draft-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .draft-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .draft-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .draft-delete {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .draft-delete:hover {
+    border-color: var(--fail-border);
+    background: var(--fail-bg);
+    color: var(--fail);
+  }
+
+  .drafts-empty {
+    padding: 28px 12px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .drafts-divider {
+    padding: 8px 12px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+
   @media (max-width: 640px) {
     .field-grid, .field-grid-3 { grid-template-columns: 1fr; }
     .field-grid .full-width, .field-grid-3 > * { grid-column: 1; }
@@ -1138,6 +1268,7 @@
     .schedule-input-group .field-input { width: 100%; }
     .topbar { padding: 12px 16px; }
     .main { padding: 20px 12px 80px; }
+    .drafts-dropdown { width: calc(100vw - 24px); right: -12px; }
   }
 </style>
 <script src="celebration-config.js"></script>
@@ -1150,6 +1281,18 @@
   </div>
   <div class="topbar-right">
     <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
+    <div class="drafts-container">
+      <button class="btn" onclick="toggleDraftsDropdown()" id="draftsBtn">Drafts</button>
+      <div class="drafts-dropdown" id="draftsDropdown">
+        <div class="drafts-header">
+          <button class="drafts-save-btn" onclick="saveDraft()">Save Current as Draft</button>
+        </div>
+        <div class="drafts-divider" id="draftsLabel">Saved Drafts</div>
+        <div class="drafts-list" id="draftsList">
+          <div class="drafts-empty">Loading...</div>
+        </div>
+      </div>
+    </div>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" id="themeBtn">🌙</button>
   </div>
 </div>
@@ -1922,6 +2065,219 @@
     t.textContent = msg;
     t.className = 'toast show' + (isError ? ' error' : '');
     setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  // =============================================
+  // DRAFTS
+  // =============================================
+
+  function jsonpFetch(params) {
+    return new Promise(function(resolve, reject) {
+      var callbackName = '_draftsCb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+      var timeout = setTimeout(function() {
+        delete window[callbackName];
+        script.remove();
+        reject(new Error('Request timed out'));
+      }, 15000);
+
+      window[callbackName] = function(data) {
+        clearTimeout(timeout);
+        delete window[callbackName];
+        script.remove();
+        resolve(data);
+      };
+
+      var query = Object.keys(params).concat(['callback']).map(function(k) {
+        var v = k === 'callback' ? callbackName : params[k];
+        return k + '=' + encodeURIComponent(v);
+      }).join('&');
+
+      var script = document.createElement('script');
+      script.src = GOOGLE_SCRIPT_URL + '?' + query;
+      script.onerror = function() {
+        clearTimeout(timeout);
+        delete window[callbackName];
+        script.remove();
+        reject(new Error('Network error'));
+      };
+      document.body.appendChild(script);
+    });
+  }
+
+  function toggleDraftsDropdown() {
+    var dropdown = document.getElementById('draftsDropdown');
+    var isOpen = dropdown.classList.contains('open');
+
+    if (isOpen) {
+      dropdown.classList.remove('open');
+    } else {
+      dropdown.classList.add('open');
+      fetchDraftsList();
+    }
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    var container = document.querySelector('.drafts-container');
+    if (container && !container.contains(e.target)) {
+      document.getElementById('draftsDropdown').classList.remove('open');
+    }
+  });
+
+  function escapeForAttr(str) {
+    if (!str) return '';
+    return encodeURIComponent(str);
+  }
+
+  function unescapeFromAttr(str) {
+    if (!str) return '';
+    return decodeURIComponent(str);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  async function fetchDraftsList() {
+    var listEl = document.getElementById('draftsList');
+    var labelEl = document.getElementById('draftsLabel');
+    listEl.innerHTML = '<div class="drafts-empty">Loading...</div>';
+
+    try {
+      var result = await jsonpFetch({ action: 'list_drafts' });
+
+      if (!result.drafts || result.drafts.length === 0) {
+        listEl.innerHTML = '<div class="drafts-empty">No saved drafts</div>';
+        labelEl.style.display = 'none';
+        return;
+      }
+
+      labelEl.style.display = 'block';
+      listEl.innerHTML = result.drafts.map(function(d) {
+        var safeName = escapeForAttr(d.campaign_name);
+        return '<div class="draft-item" onclick="loadDraft(unescapeFromAttr(\'' + safeName + '\'))">'
+          + '<div class="draft-info">'
+          + '<div class="draft-name">' + escapeHtml(d.campaign_name) + '</div>'
+          + '<div class="draft-meta">' + escapeHtml(d.saved_by) + ' · ' + escapeHtml(d.last_saved) + '</div>'
+          + '</div>'
+          + '<button class="draft-delete" onclick="event.stopPropagation(); deleteDraft(unescapeFromAttr(\'' + safeName + '\'))" title="Delete draft">×</button>'
+          + '</div>';
+      }).join('');
+    } catch (err) {
+      listEl.innerHTML = '<div class="drafts-empty">Failed to load drafts</div>';
+    }
+  }
+
+  async function saveDraft() {
+    var data = gatherFormData();
+
+    if (!data.campaign_name || !data.campaign_name.trim()) {
+      showToast('Enter a Campaign Name before saving draft', true);
+      return;
+    }
+
+    data._action = 'save_draft';
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      showToast('Draft saved: ' + data.campaign_name);
+      // Brief delay to let the sheet update before refreshing list
+      setTimeout(fetchDraftsList, 1500);
+    } catch (err) {
+      showToast('Error saving draft: ' + err.message, true);
+    }
+  }
+
+  async function loadDraft(campaignName) {
+    // Check if form currently has data
+    var currentData = gatherFormData();
+    var hasData = (currentData.campaign_name && currentData.campaign_name.trim())
+      || (currentData.campaign_id && currentData.campaign_id.trim())
+      || (currentData.jira_link && currentData.jira_link.trim());
+
+    if (hasData && !confirm('Load this draft? Current form data will be replaced.')) {
+      return;
+    }
+
+    try {
+      var result = await jsonpFetch({ action: 'load_draft', campaign_name: campaignName });
+
+      if (result.error) {
+        showToast(result.error, true);
+        return;
+      }
+
+      restoreFormData(result.form_data);
+      document.getElementById('draftsDropdown').classList.remove('open');
+      showToast('Draft loaded: ' + campaignName);
+    } catch (err) {
+      showToast('Error loading draft: ' + err.message, true);
+    }
+  }
+
+  async function deleteDraft(campaignName) {
+    if (!confirm('Delete draft "' + campaignName + '"?')) return;
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _action: 'delete_draft', campaign_name: campaignName }),
+      });
+      showToast('Draft deleted');
+      setTimeout(fetchDraftsList, 1500);
+    } catch (err) {
+      showToast('Error deleting draft: ' + err.message, true);
+    }
+  }
+
+  function restoreFormData(data) {
+    if (!data) return;
+
+    // Clear form first
+    clearForm();
+
+    // Restore text/textarea/date/time/number fields
+    document.querySelectorAll('.field-input').forEach(function(input) {
+      var field = input.dataset.field;
+      if (field && data[field] !== undefined && data[field] !== null) {
+        input.value = data[field];
+      }
+    });
+
+    // Restore radio buttons
+    document.querySelectorAll('.radio-group-simple').forEach(function(group) {
+      var field = group.dataset.field;
+      if (data[field]) {
+        var radio = group.querySelector('input[value="' + CSS.escape(data[field]) + '"]');
+        if (radio) radio.checked = true;
+      }
+    });
+
+    // Restore checkboxes
+    document.querySelectorAll('input[data-check]').forEach(function(cb) {
+      var field = cb.dataset.check;
+      if (data[field] === 'yes') {
+        cb.checked = true;
+      }
+    });
+
+    // Trigger conditional section visibility
+    toggleExperimentFields();
+    checkScheduleTime();
+
+    // Update link params field visibility
+    var linkParamsCheck = document.querySelector('[data-check="link_params_set"]');
+    if (linkParamsCheck) {
+      document.getElementById('missingParamsField').style.display = linkParamsCheck.checked ? 'none' : 'block';
+    }
   }
 
   initToggles();
