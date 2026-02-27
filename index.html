@@ -1594,7 +1594,7 @@
   // =============================================
   // CONFIG: Update with your Apps Script URL
   // =============================================
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhCUAUk5NXGA1NDrvUNtptZav4JcqZO5KRNBcOP3bSnj7BpH2vAafw2gzMc10x7swP/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2drh2GDC3_IbZXFzBgpjaJPSjYHAycMulcpxwYxgN440zBijAknwScYQvHcodpF_D/exec';
 
   // State
   const formData = {};
@@ -2044,37 +2044,21 @@
   // DRAFTS
   // =============================================
 
-  function jsonpFetch(params) {
-    return new Promise(function(resolve, reject) {
-      var callbackName = '_draftsCb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-      var timeout = setTimeout(function() {
-        delete window[callbackName];
-        script.remove();
-        reject(new Error('Request timed out'));
-      }, 15000);
+  async function draftsFetch(params) {
+    var query = Object.keys(params).map(function(k) {
+      return k + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    var url = GOOGLE_SCRIPT_URL + '?' + query;
 
-      window[callbackName] = function(data) {
-        clearTimeout(timeout);
-        delete window[callbackName];
-        script.remove();
-        resolve(data);
-      };
+    console.log('Drafts fetch:', url);
 
-      var query = Object.keys(params).concat(['callback']).map(function(k) {
-        var v = k === 'callback' ? callbackName : params[k];
-        return k + '=' + encodeURIComponent(v);
-      }).join('&');
-
-      var script = document.createElement('script');
-      script.src = GOOGLE_SCRIPT_URL + '?' + query;
-      script.onerror = function() {
-        clearTimeout(timeout);
-        delete window[callbackName];
-        script.remove();
-        reject(new Error('Network error'));
-      };
-      document.body.appendChild(script);
-    });
+    var response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('HTTP ' + response.status);
+    }
+    var data = await response.json();
+    console.log('Drafts response:', data);
+    return data;
   }
 
   function toggleDraftsDropdown() {
@@ -2097,16 +2081,6 @@
     }
   });
 
-  function escapeForAttr(str) {
-    if (!str) return '';
-    return encodeURIComponent(str);
-  }
-
-  function unescapeFromAttr(str) {
-    if (!str) return '';
-    return decodeURIComponent(str);
-  }
-
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -2118,7 +2092,7 @@
     listEl.innerHTML = '<div class="drafts-empty">Loading...</div>';
 
     try {
-      var result = await jsonpFetch({ action: 'list_drafts' });
+      var result = await draftsFetch({ action: 'list_drafts' });
 
       if (!result.drafts || result.drafts.length === 0) {
         listEl.innerHTML = '<div class="drafts-empty">No saved drafts</div>';
@@ -2128,18 +2102,35 @@
 
       labelEl.style.display = 'block';
       listEl.innerHTML = result.drafts.map(function(d) {
-        var safeName = escapeForAttr(d.campaign_name);
-        return '<div class="draft-item" onclick="loadDraft(unescapeFromAttr(\'' + safeName + '\'))">'
-          + '<div class="draft-info">'
-          + '<div class="draft-name">' + escapeHtml(d.campaign_name) + '</div>'
+        var safeName = escapeHtml(d.campaign_name);
+        return '<div class="draft-item" data-draft-name="' + safeName + '">'
+          + '<div class="draft-info" onclick="loadDraftByEl(this.parentElement)">'
+          + '<div class="draft-name">' + safeName + '</div>'
           + '<div class="draft-meta">' + escapeHtml(d.saved_by) + ' · ' + escapeHtml(d.last_saved) + '</div>'
           + '</div>'
-          + '<button class="draft-delete" onclick="event.stopPropagation(); deleteDraft(unescapeFromAttr(\'' + safeName + '\'))" title="Delete draft">×</button>'
+          + '<button class="draft-delete" onclick="event.stopPropagation(); deleteDraftByEl(this.parentElement)" title="Delete draft">×</button>'
           + '</div>';
       }).join('');
     } catch (err) {
+      console.error('Failed to load drafts:', err);
       listEl.innerHTML = '<div class="drafts-empty">Failed to load drafts</div>';
     }
+  }
+
+  function getDraftNameFromEl(el) {
+    return el.getAttribute('data-draft-name')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  }
+
+  function loadDraftByEl(el) {
+    var name = getDraftNameFromEl(el.closest('.draft-item'));
+    loadDraft(name);
+  }
+
+  function deleteDraftByEl(el) {
+    var name = getDraftNameFromEl(el);
+    deleteDraft(name);
   }
 
   async function saveDraft() {
@@ -2157,7 +2148,6 @@
 
     data._action = 'save_draft';
 
-    // Log for debugging
     console.log('Saving draft:', campaignName, data);
 
     try {
@@ -2188,7 +2178,7 @@
     }
 
     try {
-      var result = await jsonpFetch({ action: 'load_draft', campaign_name: campaignName });
+      var result = await draftsFetch({ action: 'load_draft', campaign_name: campaignName });
 
       if (result.error) {
         showToast(result.error, true);
