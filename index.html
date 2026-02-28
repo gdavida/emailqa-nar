@@ -933,6 +933,17 @@
     text-decoration: underline;
   }
 
+  .version-a-warning {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--flag-bg);
+    border: 1px solid var(--flag);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -1147,6 +1158,56 @@
   /* Drafts */
   .drafts-container {
     position: relative;
+  }
+
+  .btn-clear-form {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.15s ease;
+  }
+
+  .btn-clear-form:hover {
+    color: var(--fail);
+  }
+
+  .project-toggle {
+    display: inline-flex;
+    width: fit-content;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .project-option {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 20px;
+    background: var(--surface);
+    color: var(--text-dim);
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .project-option:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+
+  .project-option.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  .project-option:not(.active):hover {
+    background: var(--surface-hover);
+    color: var(--text);
   }
 
   .btn-save-draft {
@@ -1377,6 +1438,7 @@
   </div>
   <div class="topbar-right">
     <button class="btn hide" onclick="celebrate()" style="background: #f59e0b; color: white; font-size: 11px;">🧪 Test Celebration</button>
+    <button class="btn-clear-form" onclick="confirmClearForm()">Clear</button>
     <div class="drafts-container">
       <button class="btn-load-draft" onclick="toggleDraftsDropdown()" id="draftsBtn">Load Draft</button>
       <div class="drafts-dropdown" id="draftsDropdown">
@@ -1411,6 +1473,13 @@
         <div class="field full-width">
           <label class="field-label">QA'd By</label>
           <input class="field-input" type="text" data-field="qa_by" placeholder="Your name" id="topbarQaBy">
+        </div>
+        <div class="field">
+          <label class="field-label">Project</label>
+          <div class="project-toggle" data-field="project">
+            <button type="button" class="project-option active" data-value="NAR" onclick="setProject('NAR')">NAR</button>
+            <button type="button" class="project-option" data-value="CRD" onclick="setProject('CRD')">CRD</button>
+          </div>
         </div>
       </div>
       <div class="subsection-divider"></div>
@@ -1516,8 +1585,8 @@
               <span>iPhone</span>
             </label>
             <label class="checklist-item">
-              <input type="checkbox" data-check="preview_samsung">
-              <span>Samsung</span>
+              <input type="checkbox" data-check="preview_android">
+              <span>Android</span>
             </label>
           </div>
           <div class="checklist-subgroup">
@@ -1606,7 +1675,7 @@
           <input type="checkbox" data-check="lists_match_strategy">
           <span>Attached lists match Audience Strategy</span>
         </label>
-        <label class="checklist-item">
+        <label class="checklist-item" id="suppressionItem">
           <input type="checkbox" data-check="suppression_attached">
           <span>Standard suppression lists attached (Bounces 2026, Global Unsubscribes)</span>
         </label>
@@ -1642,6 +1711,23 @@
             <input type="checkbox" data-check="exp_goal_aligned">
             <span>Setup aligns with experiment goal</span>
           </label>
+
+          <div style="margin-top: 12px;">
+            <label class="field-label">Did you make changes to Version A after the test was set up?</label>
+            <div class="radio-group-simple" data-field="exp_version_a_changed" id="versionAToggle">
+              <label class="radio-simple">
+                <input type="radio" name="exp_version_a_changed" value="yes" onchange="toggleVersionAWarning()">
+                <span>Yes</span>
+              </label>
+              <label class="radio-simple">
+                <input type="radio" name="exp_version_a_changed" value="no" onchange="toggleVersionAWarning()">
+                <span>No</span>
+              </label>
+            </div>
+            <div class="version-a-warning" id="versionAWarning" style="display: none;">
+              <strong>⚠️ Double-check:</strong> Changes to Version A won't automatically populate to other test templates. Verify your change is reflected across all versions, if applicable. This is particularly relevant for subject line tests.
+            </div>
+          </div>
         </div>
         <!-- Shows when experiment = no -->
         <div id="experimentNoItems" style="display: none;">
@@ -1722,7 +1808,7 @@
   // =============================================
   // CONFIG: Update with your Apps Script URL
   // =============================================
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxulhZzfruJVynZAfVZq1cgtPT3UA9ZeT64w4ve1JZmhj-k5f4GBkmNmeLyE8tzMHKq/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBjsv-QKv8IEybVpJ15AAVkpVxQUiP_84zsWkVsaYP0xt-nTaQgYdxMqjowzAR8A7F/exec';
 
   // State
   const formData = {};
@@ -1802,6 +1888,33 @@
     noItems.style.display = isNo ? 'block' : 'none';
   }
 
+  function toggleVersionAWarning() {
+    var yes = document.querySelector('input[name="exp_version_a_changed"][value="yes"]');
+    document.getElementById('versionAWarning').style.display = (yes && yes.checked) ? 'block' : 'none';
+  }
+
+  function setProject(value) {
+    document.querySelectorAll('.project-option').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.value === value);
+    });
+
+    // CRD: hide suppression list requirement
+    var suppressionItem = document.getElementById('suppressionItem');
+    if (value === 'CRD') {
+      suppressionItem.style.display = 'none';
+      // Uncheck it so it doesn't block validation
+      var cb = suppressionItem.querySelector('input[type="checkbox"]');
+      if (cb) cb.checked = false;
+    } else {
+      suppressionItem.style.display = '';
+    }
+  }
+
+  function getProject() {
+    var active = document.querySelector('.project-option.active');
+    return active ? active.dataset.value : 'NAR';
+  }
+
   function checkScheduleTime() {
     const dateInput = document.getElementById('scheduledDate');
     const timeInput = document.getElementById('scheduledTime');
@@ -1850,6 +1963,7 @@
       formData[cb.dataset.check] = cb.checked ? 'yes' : 'no';
     });
     formData.qa_date = new Date().toISOString();
+    formData.project = getProject();
     return { ...formData };
   }
 
@@ -1921,14 +2035,18 @@
     }
 
     // Required checkboxes in QA Checklist
+    const currentProject = getProject();
     const requiredChecks = [
       'cid_on_links',
       'links_match_brief',
       'lists_match_strategy',
-      'suppression_attached',
       'iterable_link_set',
       'view_online_link_set',
     ];
+    // Suppression only required for NAR
+    if (currentProject !== 'CRD') {
+      requiredChecks.push('suppression_attached');
+    }
 
     requiredChecks.forEach(checkName => {
       const checkbox = document.querySelector(`[data-check="${checkName}"]`);
@@ -2136,6 +2254,12 @@
     }, 9500);
   }
 
+  function confirmClearForm() {
+    if (!confirm('Clear the entire form? This can\'t be undone.')) return;
+    clearForm();
+    showToast('Form cleared');
+  }
+
   function clearForm() {
     document.querySelectorAll('.field-input').forEach(i => {
       if (i.tagName === 'SELECT') i.selectedIndex = 0;
@@ -2149,7 +2273,9 @@
     document.getElementById('experimentYesItems').style.display = 'none';
     document.getElementById('experimentNoItems').style.display = 'none';
     document.getElementById('shortSendWarning').style.display = 'none';
+    document.getElementById('versionAWarning').style.display = 'none';
     document.getElementById('missingParamsField').style.display = 'block';
+    setProject('NAR');
     clearErrors();
     Object.keys(formData).forEach(k => delete formData[k]);
     updateCounts();
@@ -2442,7 +2568,9 @@
     });
 
     // Trigger conditional section visibility
+    if (data.project) setProject(data.project);
     toggleExperimentFields();
+    toggleVersionAWarning();
     checkScheduleTime();
 
     // Update link params field visibility
