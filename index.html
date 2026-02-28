@@ -1253,8 +1253,8 @@
   .draft-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 11px 12px;
+    gap: 8px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     transition: background 0.15s ease;
@@ -1271,6 +1271,27 @@
   .draft-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .draft-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .draft-text {
+    flex: 1;
+    min-width: 0;
   }
 
   .draft-name {
@@ -1283,9 +1304,16 @@
   }
 
   .draft-meta {
-    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  .draft-date-pill {
+    font-size: 10px;
+    font-weight: 600;
     color: var(--text-dim);
-    margin-top: 2px;
+    background: var(--na-bg);
+    padding: 2px 7px;
+    border-radius: 8px;
   }
 
   .draft-delete {
@@ -1358,6 +1386,10 @@
         </div>
       </div>
     </div>
+    <button class="btn-save-draft" onclick="saveDraft()" id="saveDraftBtn">
+      <span class="btn-label">Save Draft</span>
+      <span class="spinner"></span>
+    </button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" id="themeBtn">🌙</button>
   </div>
 </div>
@@ -1690,7 +1722,7 @@
   // =============================================
   // CONFIG: Update with your Apps Script URL
   // =============================================
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwza2I1hchzy1ir4PLW6Kheu3GfIlt61jRiF_OEu0se27pa_nsK645l4iQ9NVsO6hNR/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxulhZzfruJVynZAfVZq1cgtPT3UA9ZeT64w4ve1JZmhj-k5f4GBkmNmeLyE8tzMHKq/exec';
 
   // State
   const formData = {};
@@ -2182,6 +2214,20 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function getInitials(name) {
+    if (!name || name === 'Unknown') return '?';
+    var parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0][0].toUpperCase();
+  }
+
+  function getAvatarColor(name) {
+    var colors = ['#6C5CE7', '#00B894', '#E17055', '#0984E3', '#FDCB6E', '#E84393', '#00CEC9', '#A29BFE'];
+    var hash = 0;
+    for (var i = 0; i < (name || '').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
+  }
+
   function formatDraftDate(dateStr) {
     if (!dateStr) return '';
     try {
@@ -2218,10 +2264,15 @@
       listEl.innerHTML = result.drafts.map(function(d) {
         var safeName = escapeHtml(d.campaign_name);
         var displayDate = formatDraftDate(d.last_saved);
+        var initials = getInitials(d.saved_by);
+        var color = getAvatarColor(d.saved_by);
         return '<div class="draft-item" data-draft-name="' + safeName + '">'
           + '<div class="draft-info" onclick="loadDraftByEl(this.parentElement)">'
+          + '<div class="draft-avatar" style="background:' + color + '">' + initials + '</div>'
+          + '<div class="draft-text">'
           + '<div class="draft-name">' + safeName + '</div>'
-          + '<div class="draft-meta">' + escapeHtml(d.saved_by) + ' · ' + displayDate + '</div>'
+          + '<div class="draft-meta"><span class="draft-date-pill">' + displayDate + '</span></div>'
+          + '</div>'
           + '</div>'
           + '<button class="draft-delete" onclick="event.stopPropagation(); deleteDraftByEl(this.parentElement)" title="Delete draft">×</button>'
           + '</div>';
@@ -2268,7 +2319,9 @@
     }
 
     var link = document.querySelector('.save-draft-link');
+    var btn = document.getElementById('saveDraftBtn');
     if (link) link.textContent = 'saving...';
+    if (btn) { btn.disabled = true; btn.classList.add('saving'); }
 
     data._action = 'save_draft';
 
@@ -2286,11 +2339,28 @@
         link.textContent = '✓ draft saved';
         setTimeout(function() { link.textContent = 'or save as draft'; }, 2500);
       }
+      if (btn) {
+        btn.classList.remove('saving');
+        btn.classList.add('saved');
+        btn.querySelector('.btn-label').textContent = '✓ Saved';
+        btn.querySelector('.btn-label').style.display = '';
+        setTimeout(function() {
+          btn.classList.remove('saved');
+          btn.querySelector('.btn-label').textContent = 'Save Draft';
+          btn.disabled = false;
+        }, 2000);
+      }
 
       showToast('Draft saved: ' + campaignName);
     } catch (err) {
       showToast('Error saving draft: ' + err.message, true);
       if (link) link.textContent = 'or save as draft';
+      if (btn) {
+        btn.classList.remove('saving');
+        btn.querySelector('.btn-label').textContent = 'Save Draft';
+        btn.querySelector('.btn-label').style.display = '';
+        btn.disabled = false;
+      }
     }
   }
 
