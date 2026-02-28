@@ -123,6 +123,19 @@
     letter-spacing: -0.02em;
   }
 
+  .tracker-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .tracker-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
   .topbar-right {
     display: flex;
     gap: 10px;
@@ -1796,6 +1809,7 @@
 
 <!-- Status bar -->
 <div class="status-bar">
+  <a href="https://docs.google.com/spreadsheets/d/1kU4MZiYJ2CXwwuuXtFIaHAmAxB3BMOgqpHy4qiCj0Fk/edit?usp=sharing" target="_blank" class="tracker-link">View Tracker</a>
   <div class="status-pills" id="statusPills"></div>
   <button class="btn btn-primary" id="submitBtn2" onclick="submitForm()">Submit QA</button>
   <a href="#" class="save-draft-link" onclick="event.preventDefault(); saveDraft();">or save as draft</a>
