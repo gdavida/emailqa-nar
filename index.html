@@ -176,15 +176,15 @@
   .btn:hover { background: var(--surface-hover); border-color: var(--text-dim); }
 
   .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--section-list);
+    border-color: var(--section-list);
     color: white;
   }
 
   .btn-primary:hover {
-    background: #6B7BFF;
-    border-color: #6B7BFF;
-    box-shadow: 0 0 20px var(--accent-glow);
+    background: #15903f;
+    border-color: #15903f;
+    box-shadow: 0 0 20px rgba(22, 163, 74, 0.3);
   }
 
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -931,19 +931,24 @@
   .status-pill.flag { background: var(--flag-bg); color: var(--flag); }
   .status-pill.remaining { background: var(--na-bg); color: var(--text-dim); }
 
-  .save-draft-link {
+  .btn-save-draft-bottom {
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
     text-decoration: none;
-    padding: 4px 8px;
-    transition: color 0.15s ease;
-    white-space: nowrap;
+    transition: all 0.15s ease;
   }
 
-  .save-draft-link:hover {
-    color: var(--accent);
-    text-decoration: underline;
+  .btn-save-draft-bottom:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+    background: var(--surface-hover);
   }
 
   .version-a-warning {
@@ -1812,7 +1817,7 @@
   <a href="https://docs.google.com/spreadsheets/d/1kU4MZiYJ2CXwwuuXtFIaHAmAxB3BMOgqpHy4qiCj0Fk/edit?usp=sharing" target="_blank" class="tracker-link">View Tracker</a>
   <div class="status-pills" id="statusPills"></div>
   <button class="btn btn-primary" id="submitBtn2" onclick="submitForm()">Submit QA</button>
-  <a href="#" class="save-draft-link" onclick="event.preventDefault(); saveDraft();">or save as draft</a>
+  <a href="#" class="btn-save-draft-bottom" onclick="event.preventDefault(); saveDraft();">Save Draft</a>
 </div>
 
 <!-- Toast -->
@@ -1822,7 +1827,7 @@
   // =============================================
   // CONFIG: Update with your Apps Script URL
   // =============================================
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBjsv-QKv8IEybVpJ15AAVkpVxQUiP_84zsWkVsaYP0xt-nTaQgYdxMqjowzAR8A7F/exec';
+  const GOOGLE_SCRIPT_URL = 'https://docs.google.com/spreadsheets/d/1kU4MZiYJ2CXwwuuXtFIaHAmAxB3BMOgqpHy4qiCj0Fk/edit?usp=sharing';
 
   // State
   const formData = {};
@@ -2458,9 +2463,9 @@
       return;
     }
 
-    var link = document.querySelector('.save-draft-link');
+    var link = document.querySelector('.btn-save-draft-bottom');
     var btn = document.getElementById('saveDraftBtn');
-    if (link) link.textContent = 'saving...';
+    if (link) link.textContent = 'Saving...';
     if (btn) { btn.disabled = true; btn.classList.add('saving'); }
 
     data._action = 'save_draft';
@@ -2476,8 +2481,8 @@
       });
 
       if (link) {
-        link.textContent = '✓ draft saved';
-        setTimeout(function() { link.textContent = 'or save as draft'; }, 2500);
+        link.textContent = '✓ Saved';
+        setTimeout(function() { link.textContent = 'Save Draft'; }, 2500);
       }
       if (btn) {
         btn.classList.remove('saving');
@@ -2494,7 +2499,7 @@
       showToast('Draft saved: ' + campaignName);
     } catch (err) {
       showToast('Error saving draft: ' + err.message, true);
-      if (link) link.textContent = 'or save as draft';
+      if (link) link.textContent = 'Save Draft';
       if (btn) {
         btn.classList.remove('saving');
         btn.querySelector('.btn-label').textContent = 'Save Draft';
