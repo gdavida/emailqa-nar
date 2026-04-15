@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAR Emergency Email</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="light"] {
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --surface-hover: #F0F1F4;
+    --border: #E0E2E8;
+    --border-focus: #5B6BF0;
+    --text: #1A1D27;
+    --text-muted: #6B7085;
+    --text-dim: #9DA2B3;
+    --accent: #5B6BF0;
+    --accent-glow: rgba(91, 107, 240, 0.12);
+    --pass: #16A34A;
+    --pass-bg: rgba(22, 163, 74, 0.08);
+    --pass-border: rgba(22, 163, 74, 0.3);
+    --fail: #DC2626;
+    --fail-bg: rgba(220, 38, 38, 0.06);
+    --fail-border: rgba(220, 38, 38, 0.3);
+    --stage1: #D97706;
+    --stage1-bg: rgba(217, 119, 6, 0.07);
+    --stage1-border: rgba(217, 119, 6, 0.3);
+    --stage2: #2563EB;
+    --stage2-bg: rgba(37, 99, 235, 0.07);
+    --stage2-border: rgba(37, 99, 235, 0.25);
+    --stage3: #16A34A;
+    --stage3-bg: rgba(22, 163, 74, 0.07);
+    --stage3-border: rgba(22, 163, 74, 0.25);
+    --topbar-bg: rgba(245, 246, 248, 0.88);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0F1117;
+    --surface: #1A1D27;
+    --surface-hover: #22252F;
+    --border: #2A2D3A;
+    --border-focus: #5B6BF0;
+    --text: #E8E9ED;
+    --text-muted: #8B8FA3;
+    --text-dim: #5A5E72;
+    --accent: #5B6BF0;
+    --accent-glow: rgba(91, 107, 240, 0.15);
+    --pass: #34D399;
+    --pass-bg: rgba(52, 211, 153, 0.1);
+    --pass-border: rgba(52, 211, 153, 0.35);
+    --fail: #F87171;
+    --fail-bg: rgba(248, 113, 113, 0.1);
+    --fail-border: rgba(248, 113, 113, 0.35);
+    --stage1: #FBBF24;
+    --stage1-bg: rgba(251, 191, 36, 0.1);
+    --stage1-border: rgba(251, 191, 36, 0.35);
+    --stage2: #60A5FA;
+    --stage2-bg: rgba(96, 165, 250, 0.1);
+    --stage2-border: rgba(96, 165, 250, 0.3);
+    --stage3: #34D399;
+    --stage3-bg: rgba(52, 211, 153, 0.1);
+    --stage3-border: rgba(52, 211, 153, 0.3);
+    --topbar-bg: rgba(15, 17, 23, 0.85);
+    --shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--topbar-bg); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border); padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .topbar-title { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+  .back-link { font-size: 12px; font-weight: 500; color: var(--text-dim); text-decoration: none; transition: color 0.15s ease; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-right { display: flex; gap: 10px; align-items: center; }
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-muted); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 16px; transition: all 0.15s ease;
+  }
+  .theme-toggle:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-clear { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--text-dim); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: var(--radius); transition: color 0.15s ease; }
+  .btn-clear:hover { color: var(--fail); }
+
+  .main { max-width: 680px; margin: 0 auto; padding: 28px 24px 100px; }
+
+  .alert-banner {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--fail-bg); border: 1px solid var(--fail-border);
+    border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 24px;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-text { font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+  .alert-text strong { color: var(--text); font-weight: 600; }
+
+  /* Stage card */
+  .stage {
+    margin-bottom: 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .stage-header {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    user-select: none; transition: background 0.15s ease;
+  }
+  .stage-header:hover { background: var(--surface-hover); }
+  .stage.collapsed .stage-header { border-bottom: none; }
+  .stage.collapsed .stage-body { display: none; }
+  .stage-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0;
+  }
+  .stage-1 .stage-badge { background: var(--stage1-bg); color: var(--stage1); border: 1px solid var(--stage1-border); }
+  .stage-2 .stage-badge { background: var(--stage2-bg); color: var(--stage2); border: 1px solid var(--stage2-border); }
+  .stage-3 .stage-badge { background: var(--stage3-bg); color: var(--stage3); border: 1px solid var(--stage3-border); }
+  .stage-subtitle { font-size: 12px; color: var(--text-dim); }
+  .stage-progress { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0; }
+  .stage-chevron { margin-left: auto; color: var(--text-dim); transition: transform 0.2s ease; font-size: 13px; flex-shrink: 0; }
+  .stage.collapsed .stage-chevron { transform: rotate(-90deg); }
+
+  /* Intake form */
+  .intake-body { padding: 20px 18px; }
+  .field-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
+  .field-group:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .field-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 14px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field-row.single { grid-template-columns: 1fr; }
+  .field-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.02em; }
+  .field-input {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); transition: all 0.15s ease; outline: none; box-shadow: var(--shadow);
+  }
+  .field-input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-glow); background: var(--surface); }
+  .field-input::placeholder { color: var(--text-dim); }
+  textarea.field-input { resize: vertical; min-height: 68px; }
+  .field-input.error { border-color: var(--fail); box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+
+  /* Radio pills */
+  .radio-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .radio-pill {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-muted); cursor: pointer;
+    transition: all 0.15s ease; box-shadow: var(--shadow); user-select: none;
+  }
+  .radio-pill:hover { border-color: var(--text-dim); color: var(--text); }
+  .radio-pill input { display: none; }
+  .radio-pill.selected { background: var(--accent-glow); border-color: var(--border-focus); color: var(--accent); }
+
+  /* Conditional */
+  .conditional { display: none; }
+  .conditional.show { display: block; }
+
+  /* Checklist */
+  .item-group { padding: 14px 16px 10px; border-bottom: 1px dashed var(--border); }
+  .item-group:last-child { border-bottom: none; }
+  .item-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px; padding-left: 28px; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; cursor: pointer; transition: opacity 0.12s ease; }
+  .check-item:hover { opacity: 0.8; }
+  .check-item input[type="checkbox"] {
+    appearance: none; width: 18px; height: 18px; min-width: 18px;
+    border: 2px solid var(--border); border-radius: 4px; margin: 0; margin-top: 1px;
+    cursor: pointer; transition: all 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .check-item input[type="checkbox"]:hover { border-color: var(--text-dim); }
+  .stage-2 .check-item input[type="checkbox"]:checked { background: var(--stage2); border-color: var(--stage2); }
+  .stage-3 .check-item input[type="checkbox"]:checked { background: var(--stage3); border-color: var(--stage3); }
+  .check-item input[type="checkbox"]:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 11px; font-weight: 700; }
+  .check-item:has(input:checked) .item-label { color: var(--text-dim); text-decoration: line-through; text-decoration-color: var(--border); }
+  .check-item:has(input:checked) .item-note { color: var(--text-dim); opacity: 0.6; }
+  .item-text { flex: 1; }
+  .item-label { font-size: 14px; color: var(--text); line-height: 1.4; }
+  .item-note { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+  .opt-tag { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); border-radius: 20px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+  .check-item.optional { opacity: 0.55; }
+  .check-item.optional:hover { opacity: 1; }
+  .check-item.optional:has(input:checked) { opacity: 1; }
+
+  /* Status bar */
+  .status-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--topbar-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 11px 32px; display: flex; align-items: center; gap: 16px; z-index: 100; }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .progress-bar-outer { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--stage1) 0%, var(--stage2) 50%, var(--stage3) 100%); border-radius: 4px; transition: width 0.3s ease; }
+  .progress-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .btn-submit { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: var(--radius); border: 1px solid var(--stage3); background: var(--stage3); color: white; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+  .btn-submit:hover { filter: brightness(1.1); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--surface); border: 1px solid var(--pass); color: var(--pass); padding: 10px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 200; box-shadow: var(--shadow-lg); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--fail); color: var(--fail); }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 12px 16px; }
+    .main { padding: 20px 12px 100px; }
+    .field-row, .field-row.thirds { grid-template-columns: 1fr; }
+    .status-bar { padding: 11px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="back-link">← QA Form</a>
+    <span class="topbar-title">Emergency Email</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-clear" onclick="confirmClear()">Clear</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="alert-banner">
+    <span class="alert-icon">🔥</span>
+    <div class="alert-text">
+      <strong>Urgent send in progress.</strong> Stage 1 is your intake — fill it out as you're getting the brief. Stages 2 and 3 are checklists to run through before proof and before send. Submit at the end to log to the tracker.
+    </div>
+  </div>
+
+  <!-- STAGE 1: INTAKE FORM -->
+  <div class="stage stage-1" id="stage1">
+    <div class="stage-header" onclick="toggleStage(this)">
+      <span class="stage-badge">Stage 1 — Intake</span>
+      <span class="stage-subtitle">Fill out as the request comes in</span>
+      <span class="stage-chevron">›</span>
+    </div>
+    <div class="stage-body">
+      <div class="intake-body">
+
+        <div class="field-group">
+          <div class="field-group-label">Who's on this</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Handled by</label>
+              <input class="field-input" type="text" id="f_handled_by" placeholder="Your name">
+            </div>
+            <div class="field">
+              <label class="field-label">Requester</label>
+              <input class="field-input" type="text" id="f_requester" placeholder="Who sent the request?">
+            </div>
+          </div>
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">How will approval be sent?</label>
+              <input class="field-input" type="text" id="f_approval_method" placeholder="e.g. Slack from Josh, email reply from Lisa...">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-label">Deadlines</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Send deadline — date</label>
+              <input class="field-input" type="date" id="f_send_date">
+            </div>
+            <div class="field">
+              <label class="field-label">Send deadline — time + timezone</label>
+              <input class="field-input" type="text" id="f_send_time" placeholder="e.g. 2:00 PM CT">
+            </div>
+          </div>
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">Content ETA</label>
+              <input class="field-input" type="text" id="f_content_eta" placeholder="e.g. by noon, waiting on Josh, already in...">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-label">Audience</div>
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">Recipient list / segment</label>
+              <input class="field-input" type="text" id="f_segment" placeholder="List name, segment ID, or describe who's receiving this">
+            </div>
+          </div>
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">Suppressions or exclusions</label>
+              <input class="field-input" type="text" id="f_suppressions" placeholder="e.g. standard suppression only, exclude recent purchasers...">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-label">Email details</div>
+
+          <div class="field-row single" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label">Subject line</label>
+              <div class="radio-pills" id="rp_subject">
+                <label class="radio-pill" onclick="selectPill(this,'rp_subject'); showCond('cond_subject','provided')"><input type="radio" name="subject_source" value="provided"> Provided by requester</label>
+                <label class="radio-pill" onclick="selectPill(this,'rp_subject'); showCond('cond_subject','writing')"><input type="radio" name="subject_source" value="writing"> We're writing it</label>
+              </div>
+              <div class="conditional" id="cond_subject_provided">
+                <input class="field-input" type="text" id="f_subject_line" placeholder="Paste subject line here">
+              </div>
+              <div class="conditional" id="cond_subject_writing">
+                <input class="field-input" type="text" id="f_subject_notes" placeholder="Direction given? Topic, tone, length...">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label">From name</label>
+              <input class="field-input" type="text" id="f_from_name" placeholder="e.g. NAR, Josh Goldblatt...">
+            </div>
+            <div class="field">
+              <label class="field-label">Reply-to</label>
+              <input class="field-input" type="text" id="f_reply_to" placeholder="e.g. noreply@nar.realtor">
+            </div>
+          </div>
+
+          <div class="field-row single" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label">Template</label>
+              <div class="radio-pills" id="rp_template">
+                <label class="radio-pill" onclick="selectPill(this,'rp_template'); showCond('cond_template','existing')"><input type="radio" name="template_type" value="existing"> Existing template</label>
+                <label class="radio-pill" onclick="selectPill(this,'rp_template'); showCond('cond_template','netnew')"><input type="radio" name="template_type" value="netnew"> Net new</label>
+              </div>
+              <div class="conditional" id="cond_template_existing">
+                <input class="field-input" type="text" id="f_template_name" placeholder="Which template? Campaign ID or name">
+              </div>
+              <div class="conditional" id="cond_template_netnew">
+                <input class="field-input" type="text" id="f_template_notes" placeholder="Any direction? How much time for design?">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row single" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label">CTAs / links</label>
+              <div class="radio-pills" id="rp_ctas">
+                <label class="radio-pill" onclick="selectPill(this,'rp_ctas'); showCond('cond_ctas','provided')"><input type="radio" name="cta_source" value="provided"> URLs provided</label>
+                <label class="radio-pill" onclick="selectPill(this,'rp_ctas'); showCond('cond_ctas','sourcing')"><input type="radio" name="cta_source" value="sourcing"> We're sourcing them</label>
+                <label class="radio-pill" onclick="selectPill(this,'rp_ctas'); showCond('cond_ctas','none')"><input type="radio" name="cta_source" value="none"> No CTAs</label>
+              </div>
+              <div class="conditional" id="cond_ctas_provided">
+                <textarea class="field-input" id="f_cta_urls" placeholder="Paste URLs here, one per line"></textarea>
+              </div>
+              <div class="conditional" id="cond_ctas_sourcing">
+                <input class="field-input" type="text" id="f_cta_sourcing_notes" placeholder="What do you need to find?">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">UTM tracking needed? <span class="opt-tag">usually no for crisis</span></label>
+              <div class="radio-pills" id="rp_utm">
+                <label class="radio-pill" onclick="selectPill(this,'rp_utm'); showCond('cond_utm','yes')"><input type="radio" name="utm_needed" value="yes"> Yes</label>
+                <label class="radio-pill" onclick="selectPill(this,'rp_utm'); showCond('cond_utm','no')"><input type="radio" name="utm_needed" value="no"> No</label>
+              </div>
+              <div class="conditional" id="cond_utm_yes">
+                <div class="field-row thirds" style="margin-bottom:0;">
+                  <div class="field">
+                    <label class="field-label">utm_campaign</label>
+                    <input class="field-input" type="text" id="f_utm_campaign" placeholder="campaign value">
+                  </div>
+                  <div class="field">
+                    <label class="field-label">utm_source</label>
+                    <input class="field-input" type="text" id="f_utm_source" placeholder="Iterable">
+                  </div>
+                  <div class="field">
+                    <label class="field-label">utm_medium</label>
+                    <input class="field-input" type="text" id="f_utm_medium" placeholder="email">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-label">Context</div>
+          <div class="field-row single">
+            <div class="field">
+              <label class="field-label">Why is this urgent? Any important context?</label>
+              <textarea class="field-input" id="f_context" placeholder="e.g. breaking news, exec-driven, system outage, event today..."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: PRE-PROOF CHECKLIST -->
+  <div class="stage stage-2" id="stage2">
+    <div class="stage-header" onclick="toggleStage(this)">
+      <span class="stage-badge">Stage 2 — Pre-proof review</span>
+      <span class="stage-progress" id="prog2">0 / 10</span>
+      <span class="stage-chevron">›</span>
+    </div>
+    <div class="stage-body">
+
+      <div class="item-group">
+        <div class="item-group-label">Content check</div>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Subject line and preheader entered + preview tested</div>
+            <div class="item-note">Do not skip — preheader cutoff catches you every time</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">All body copy pasted in — no Lorem Ipsum, no [CONTENT TBD]</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">All links tested — click every single one</div>
+            <div class="item-note">Including unsubscribe, footer links, and any image links</div>
+          </div>
+        </label>
+        <label class="check-item optional">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">UTMs attached and verified on all tracked links <span class="opt-tag">if applicable</span></div>
+            <div class="item-note">Only if tracking was confirmed in Stage 1</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Images load — no broken src, no missing alt text</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="item-group">
+        <div class="item-group-label">Setup check</div>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">From name and reply-to are correct</div>
+            <div class="item-note">Especially if this is a non-standard sender or first-time use</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Segment / list correct — verified against Stage 1 intake</div>
+            <div class="item-note">Double-check suppression lists are applied if needed</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Recipient count looks sane</div>
+            <div class="item-note">Way too high or too low usually means a segment error</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Send test to yourself (and ideally a second set of eyes)</div>
+            <div class="item-note">Check mobile and desktop render — don't just eyeball in the builder</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="2" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Proof sent to approver with explicit deadline for response stated</div>
+            <div class="item-note">Don't let approval be open-ended — say when you need it by</div>
+          </div>
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STAGE 3: PRE-SEND CHECKLIST -->
+  <div class="stage stage-3" id="stage3">
+    <div class="stage-header" onclick="toggleStage(this)">
+      <span class="stage-badge">Stage 3 — Post-approval, pre-send</span>
+      <span class="stage-progress" id="prog3">0 / 8</span>
+      <span class="stage-chevron">›</span>
+    </div>
+    <div class="stage-body">
+
+      <div class="item-group">
+        <div class="item-group-label">Final verification</div>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Approval received in writing — saved or screenshotted</div>
+            <div class="item-note">Slack message, email, even a "looks good!" counts — just capture it</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Any last-minute edits applied and re-verified</div>
+            <div class="item-note">If they changed anything after approval, get re-confirmation before sending</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Send time set correctly — date, time, timezone</div>
+            <div class="item-note">CT vs ET will ruin your day; always spell out the timezone</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Final recipient count confirmed before scheduling</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="item-group">
+        <div class="item-group-label">Post-send</div>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Confirm send status in Iterable — scheduled or sent, not draft</div>
+            <div class="item-note">Don't assume — check the campaign status explicitly</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Notify requester that email is sent / scheduled</div>
+            <div class="item-note">Close the loop — they're waiting and anxious</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Log the request — who asked, when, what was sent, what was missing</div>
+            <div class="item-note">Ammo for a future conversation about process standards</div>
+          </div>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" data-stage="3" onchange="updateProgress()">
+          <div class="item-text">
+            <div class="item-label">Check initial metrics 1 hour post-send (opens, bounces, errors)</div>
+            <div class="item-note">Catch anything catastrophic early — delivery failures, spike in unsubscribes</div>
+          </div>
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">Stage 1 of 3</span>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+  <button class="btn-submit" id="submitBtn" onclick="submitForm()">Log to Tracker</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBjsv-QKv8IEybVpJ15AAVkpVxQUiP_84zsWkVsaYP0xt-nTaQgYdxMqjowzAR8A7F/exec';
+  const CHECK_TOTALS = { 2: 10, 3: 8 };
+
+  function toggleStage(header) { header.parentElement.classList.toggle('collapsed'); }
+
+  function selectPill(pill, groupId) {
+    document.querySelectorAll(`#${groupId} .radio-pill`).forEach(p => p.classList.remove('selected'));
+    pill.classList.add('selected');
+  }
+
+  function showCond(baseId, value) {
+    document.querySelectorAll(`[id^="${baseId}_"]`).forEach(el => el.classList.remove('show'));
+    const t = document.getElementById(`${baseId}_${value}`);
+    if (t) t.classList.add('show');
+  }
+
+  function updateProgress() {
+    let checked = 0;
+    [2, 3].forEach(s => {
+      const items = document.querySelectorAll(`[data-stage="${s}"]`);
+      const done = [...items].filter(c => c.checked).length;
+      document.getElementById(`prog${s}`).textContent = `${done} / ${CHECK_TOTALS[s]}`;
+      checked += done;
+    });
+    const s2All = [...document.querySelectorAll('[data-stage="2"]')].every(c => c.checked);
+    const s3All = [...document.querySelectorAll('[data-stage="3"]')].every(c => c.checked);
+    let label = 'Stage 1 of 3', pct = 8;
+    if (s3All) { label = 'All stages complete'; pct = 100; }
+    else if (s2All) { label = 'Stage 3 of 3'; pct = 66; }
+    else if (checked > 0) { label = 'Stage 2 of 3'; pct = 33; }
+    document.getElementById('progressLabel').textContent = label;
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  function rv(name) { const r = document.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ''; }
+
+  function gatherData() {
+    const d = { _sheet_tab: 'Crisis', _action: 'crisis_submit', submitted_at: new Date().toISOString() };
+    d.handled_by = v('f_handled_by');
+    d.requester = v('f_requester');
+    d.approval_method = v('f_approval_method');
+    d.send_date = v('f_send_date');
+    d.send_time = v('f_send_time');
+    d.content_eta = v('f_content_eta');
+    d.segment = v('f_segment');
+    d.suppressions = v('f_suppressions');
+    d.subject_source = rv('subject_source');
+    d.subject_line = v('f_subject_line') || v('f_subject_notes');
+    d.from_name = v('f_from_name');
+    d.reply_to = v('f_reply_to');
+    d.template_type = rv('template_type');
+    d.template_detail = v('f_template_name') || v('f_template_notes');
+    d.cta_source = rv('cta_source');
+    d.cta_detail = v('f_cta_urls') || v('f_cta_sourcing_notes');
+    d.utm_needed = rv('utm_needed');
+    d.utm_campaign = v('f_utm_campaign');
+    d.utm_source = v('f_utm_source');
+    d.utm_medium = v('f_utm_medium');
+    d.context = v('f_context');
+    [2, 3].forEach(s => {
+      const items = document.querySelectorAll(`[data-stage="${s}"]`);
+      const done = [...items].filter(c => c.checked).length;
+      d[`stage${s}_complete`] = `${done}/${CHECK_TOTALS[s]}`;
+    });
+    return d;
+  }
+
+  function validate() {
+    let ok = true;
+    ['f_handled_by','f_requester','f_send_date','f_send_time','f_segment'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.value.trim()) { el.classList.add('error'); ok = false; }
+    });
+    return ok;
+  }
+
+  async function submitForm() {
+    if (!validate()) { showToast('Fill in the required intake fields first', true); return; }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = 'Logging...';
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(gatherData()),
+      });
+      showToast('Logged to Crisis tab ✓');
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Log to Tracker'; }, 3000);
+    } catch (err) {
+      showToast('Error: ' + err.message, true);
+      btn.disabled = false; btn.textContent = 'Log to Tracker';
+    }
+  }
+
+  function confirmClear() {
+    if (!confirm('Clear everything?')) return;
+    document.querySelectorAll('.field-input').forEach(el => el.value = '');
+    document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+    document.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.conditional').forEach(c => c.classList.remove('show'));
+    updateProgress();
+  }
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('qa-theme', next);
+  }
+
+  (function() {
+    const saved = localStorage.getItem('qa-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('themeBtn').textContent = saved === 'light' ? '🌙' : '☀️';
+    }
+  })();
+
+  document.querySelectorAll('.field-input').forEach(f => f.addEventListener('input', () => f.classList.remove('error')));
+</script>
+</body>
+</html>
