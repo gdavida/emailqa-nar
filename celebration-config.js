@@ -9,15 +9,57 @@ const CELEBRATION_CONFIG = {
   // Unicorn images - one will be randomly selected
   // Add more URLs to the array, or swap them out for holidays!
   unicorns: [
-    'https://i.ibb.co/S41ykVf1/unicorn1.png',
-    'https://i.ibb.co/3XPXYQY/unicorn2.png',
-    'https://i.ibb.co/9m8T0QRn/unicorn3.png',
-    'https://i.ibb.co/XZ8pwm5C/unicorn4.png',
-    'https://i.ibb.co/ycdYHLjB/unicorn5.png',
-    'https://i.ibb.co/q3prX5sy/unicorn6.png',
-    'https://i.ibb.co/s9gpp3pP/unicorn7.png',
-    'https://i.ibb.co/vCM5P8sP/unicorn8.png',
-    'https://i.ibb.co/nqrysktR/unicorn9.png',
+    'images/unicorn1.png',
+    'images/unicorn2.png',
+    'images/unicorn3.png',
+    'images/unicorn4.png',
+    'images/unicorn5.png',
+    'images/unicorn6.png',
+    'images/unicorn7.png',
+    'images/unicorn8.png',
+    'images/unicorn9.png',
+  ],
+
+  // Seasonal unicorns - MIXED IN with the regular ones during their date range.
+  // Dates are 'MM-DD' and inclusive. Outside the range they simply aren't used.
+  seasonal: [
+    {
+      name: 'fall',
+      start: '09-01',
+      end: '11-30',
+      images: [
+        'images/fall/fall1.png',
+        'images/fall/fall2.png',
+        'images/fall/fall3.png',
+        'images/fall/fall4.png',
+      ],
+    },
+    {
+      name: 'christmas',
+      start: '12-01',
+      end: '12-31',
+      images: [
+        'images/christmas/christmas1.png',
+        'images/christmas/christmas2.png',
+        'images/christmas/christmas3.png',
+        'images/christmas/christmas4.png',
+        'images/christmas/christmas5.png',
+        'images/christmas/christmas6.png',
+        'images/christmas/christmas7.png',
+        'images/christmas/christmas8.png',
+        'images/christmas/christmas9.png',
+        'images/christmas/christmas10.png',
+        'images/christmas/christmas11.png',
+      ],
+    },
+    {
+      name: 'newyear',
+      start: '12-26',
+      end: '01-02', // wraps past New Year
+      images: [
+        'images/newyear/newyear1.png',
+      ],
+    },
   ],
 
   // Confetti colors - bright pastels that work on light and dark modes
@@ -71,3 +113,15 @@ const CELEBRATION_CONFIG = {
   // confettiColors: ['#ff0000', '#00ff00', '#ffffff', '#ffd700'],
   // messages: [{ title: '🎄 Ho ho ho, {name}! 🎅', style: 'rainbow' }],
 };
+
+// Mix any in-season unicorns into the regular pool (based on today's date)
+(function () {
+  const now = new Date();
+  const today = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  (CELEBRATION_CONFIG.seasonal || []).forEach(function (season) {
+    const inSeason = season.start <= season.end
+      ? today >= season.start && today <= season.end
+      : today >= season.start || today <= season.end; // wraps past New Year
+    if (inSeason) CELEBRATION_CONFIG.unicorns = CELEBRATION_CONFIG.unicorns.concat(season.images);
+  });
+})();
